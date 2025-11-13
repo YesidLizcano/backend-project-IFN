@@ -2,10 +2,10 @@ from sqlmodel import Session
 
 from src.Modules.Conglomerados.Domain.subparcela import Subparcela, SubparcelaSalida
 from src.Modules.Conglomerados.Domain.subparcela_repository import SubparcelaRepository
-from src.Modules.Conglomerados.Infrastructure.persistence.subparcela_db import SubparcelaDB
+from src.Modules.Conglomerados.Infrastructure.Persistence.subparcela_db import SubparcelaDB
 
 
-class SQLAlchemySubparcelaRepository(SubparcelaRepository):
+class DBSubparcelaRepository(SubparcelaRepository):
     def __init__(self, db: Session):
         self.db = db
 

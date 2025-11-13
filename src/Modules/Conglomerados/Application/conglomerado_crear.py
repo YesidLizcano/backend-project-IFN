@@ -28,7 +28,7 @@ class CrearConglomerado:
         azimuts = [0, 90, 180, 270]  # N, E, S, W
         subparcelas = []
 
-        for azimut in azimuts: # Más limpio
+        for azimut in azimuts:
             punto = distance(meters=80).destination(origen, azimut)
             subparcelas.append(
                 Subparcela(

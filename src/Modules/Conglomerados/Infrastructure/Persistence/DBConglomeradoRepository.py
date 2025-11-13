@@ -8,12 +8,12 @@ from src.Modules.Conglomerados.Domain.subparcela import Subparcela
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
 
 # --- Importaciones de Infraestructura ---
-from src.Modules.Conglomerados.Infrastructure.persistence.conglomerado_db import ConglomeradoDB
-from src.Modules.Conglomerados.Infrastructure.persistence.subparcela_db import SubparcelaDB
+from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import ConglomeradoDB
+from src.Modules.Conglomerados.Infrastructure.Persistence.subparcela_db import SubparcelaDB
 from src.Shared.Infrastructure.Persistence.database import get_session
 
 
-class SQLAlchemyConglomeradoRepository(ConglomeradoRepository):
+class DBConglomeradoRepository(ConglomeradoRepository):
     """
     Implementación concreta del repositorio de conglomerados usando SQLAlchemy/SQLModel.
     Maneja el Conglomerado como la raíz de un agregado, incluyendo sus Subparcelas.
@@ -92,4 +92,4 @@ def get_conglomerado_repository(session: Session = Depends(get_session)) -> Cong
     Proveedor de dependencias de FastAPI para inyectar el repositorio
     de conglomerados en los endpoints/casos de uso.
     """
-    return SQLAlchemyConglomeradoRepository(session)
+    return DBConglomeradoRepository(session)

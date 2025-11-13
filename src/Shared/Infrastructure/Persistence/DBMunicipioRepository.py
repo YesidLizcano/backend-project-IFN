@@ -6,7 +6,7 @@ from src.Shared.Infrastructure.Persistence.database import get_session
 from src.Shared.Infrastructure.Persistence.municipio_db import MunicipioDB
 
 
-class SQLAlchemyMunicipioRepository(MunicipioRepository):
+class DBMunicipioRepository(MunicipioRepository):
     def __init__(self, db: Session):
         self.db = db
 
@@ -27,4 +27,4 @@ class SQLAlchemyMunicipioRepository(MunicipioRepository):
 def get_municipio_repository(
     session: Session = Depends(get_session),
 ) -> MunicipioRepository:
-    return SQLAlchemyMunicipioRepository(session)
+    return DBMunicipioRepository(session)

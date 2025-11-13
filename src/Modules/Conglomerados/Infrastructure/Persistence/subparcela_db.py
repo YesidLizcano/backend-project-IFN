@@ -5,7 +5,7 @@ from geoalchemy2 import Geography
 from datetime import date
 
 if TYPE_CHECKING:
-    from src.Modules.Conglomerados.Infrastructure.persistence.conglomerado_db import ConglomeradoDB
+    from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import ConglomeradoDB
 
 class SubparcelaDB(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)

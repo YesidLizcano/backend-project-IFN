@@ -1,20 +1,18 @@
 from datetime import date
 from pydantic import BaseModel
 
-from src.Modules.Conglomerados.Domain.subparcela import SubparcelaSalida
+from src.Modules.Brigadas.Domain.integrante import IntegranteSalida
 
 
 # --- 1. MODELO BASE (Componentes Comunes) ---
-class ConglomeradoBase(BaseModel):
+class BrigadaBase(BaseModel):
     """Contiene los campos comunes que el usuario provee."""
-    fechaInicio: date
-    fechaFinAprox: date | None
-    fechaFin: date 
-    latitud: float
-    longitud: float
+    fechaCreacion: date
+    estado: str
+
 
 # --- 2. DTO de CREACIÓN (Entrada de la API) ---
-class ConglomeradoCrear(ConglomeradoBase):
+class BrigadaCrear(BrigadaBase):
     """
     Hereda los campos base. Se usa para el cuerpo del POST.
     NO lleva municipio_id ni id.
@@ -22,20 +20,19 @@ class ConglomeradoCrear(ConglomeradoBase):
     pass
 
 # --- 3. ENTIDAD DE DOMINIO ---
-class Conglomerado(ConglomeradoBase):
+class Brigada(BrigadaBase):
     """
     Hereda los campos base y añade los campos CLAVE para la lógica
     que son obligatorios en el Dominio.
     """
-    municipio_id: int 
+    conglomerado_id: int 
 
 # --- 4. DTO de SALIDA (Respuesta de la API) ---
-class ConglomeradoSalida(Conglomerado):
+class BrigadaSalida(Brigada):
     """
     Hereda la entidad de Dominio y añade los campos generados por la BD.
     """
     id: int
-    subparcelas: list[SubparcelaSalida] = []
 
     class Config:
         from_attributes = True

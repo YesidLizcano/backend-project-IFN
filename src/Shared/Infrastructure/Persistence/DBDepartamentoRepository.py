@@ -6,7 +6,7 @@ from src.Shared.Infrastructure.Persistence.database import get_session
 from src.Shared.Infrastructure.Persistence.departamento_db import DepartamentoDB
 
 
-class SQLAlchemyDepartamentoRepository(DepartamentoRepository):
+class DBDepartamentoRepository(DepartamentoRepository):
     def __init__(self, db: Session):
         self.db = db
 
@@ -28,4 +28,4 @@ class SQLAlchemyDepartamentoRepository(DepartamentoRepository):
 def get_departamento_repository(
     session: Session = Depends(get_session),
 ) -> DepartamentoRepository:
-    return SQLAlchemyDepartamentoRepository(session)
+    return DBDepartamentoRepository(session)

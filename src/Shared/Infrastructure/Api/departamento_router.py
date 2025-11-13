@@ -5,7 +5,7 @@ from src.Shared.Application.departamento_crear import CrearDepartamento
 from src.Shared.Application.departamento_listar import ListarDepartamentos
 from src.Shared.Domain.departamento import Departamento, DepartamentoSalida
 from src.Shared.Domain.departamento_repository import DepartamentoRepository
-from src.Shared.Infrastructure.Persistence.SQLAlchemyDepartamentoRepository import get_departamento_repository
+from src.Shared.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
 
 router = APIRouter(tags = ['departamentos'])
 

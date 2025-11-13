@@ -4,8 +4,8 @@ from src.Shared.Application.municipio_crear import CrearMunicipio
 from src.Shared.Domain.departamento_repository import DepartamentoRepository
 from src.Shared.Domain.municipio import Municipio, MunicipioSalida
 from src.Shared.Domain.municipio_repository import MunicipioRepository
-from src.Shared.Infrastructure.Persistence.SQLAlchemyDepartamentoRepository import get_departamento_repository
-from src.Shared.Infrastructure.Persistence.SQLAlchemyMunicipioRepository import get_municipio_repository
+from src.Shared.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
+from src.Shared.Infrastructure.Persistence.DBMunicipioRepository import get_municipio_repository
 
 router = APIRouter(tags = ['municipios'])
 
