@@ -18,7 +18,7 @@ router = APIRouter(tags=["integranteBrigada"])
     response_model=IntegranteBrigada,
     status_code=status.HTTP_201_CREATED,
 )
-async def asignarIntegranteBrigada(
+async def asignar_integrante_brigada(
     brigada_id: int,
     integrante_id: int,
     integrante_brigada_data: IntegranteBrigadaCrear,

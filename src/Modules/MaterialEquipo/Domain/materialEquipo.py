@@ -24,7 +24,7 @@ class MaterialEquipo(MaterialEquipoBase):
     Hereda los campos base y añade los campos CLAVE para la lógica
     que son obligatorios en el Dominio.
     """
-    municipio_id: int 
+    departamento_id: int 
 
 # --- 4. DTO de SALIDA (Respuesta de la API) ---
 class MaterialEquipoSalida(MaterialEquipo):
@@ -32,7 +32,6 @@ class MaterialEquipoSalida(MaterialEquipo):
     Hereda la entidad de Dominio y añade los campos generados por la BD.
     """
     id: int
-    asignaciones: list[Brigada] = []
 
     class Config:
         from_attributes = True
