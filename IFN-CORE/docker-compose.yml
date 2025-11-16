@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: db_forest_inventory
+    restart: always
+    environment:
+      POSTGRES_USER: admin_forest
+      POSTGRES_PASSWORD: ifn2025
+      POSTGRES_DB: inventario_forestal_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
