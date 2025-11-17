@@ -1,10 +1,16 @@
 from fastapi import Depends
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
+from sqlalchemy import update
 from typing import List
 from datetime import date
 from sqlalchemy import exists, and_
 from sqlalchemy.sql.elements import ColumnElement
-from src.Modules.Brigadas.Domain.integrante import Integrante, IntegranteSalida
+from src.Modules.Brigadas.Domain.integrante import (
+    Integrante,
+    IntegranteSalida,
+    IntegranteActualizar,
+    StatusEnum,
+)
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.integrante_db import IntegranteDB
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
@@ -80,7 +86,7 @@ class DBIntegranteRepository(IntegranteRepository):
                 select(IntegranteDB)
                 .join(MunicipioDB, IntegranteDB.municipio_id == MunicipioDB.id)
                 .where(MunicipioDB.departamento_id.in_(ids_departamentos))
-                .where(IntegranteDB.estado == 'Activo')
+                .where(IntegranteDB.estado == StatusEnum.ACTIVO_DISPONIBLE)
                 .where(~asignaciones_superpuestas)
                 .where(rol_field == True)  # Verificar que el campo booleano del rol sea True
             )
@@ -165,6 +171,73 @@ class DBIntegranteRepository(IntegranteRepository):
                 "con_solapamiento": [],
                 "sin_solapamiento": []
             }
+
+    def tiene_asignacion_futura(self, integrante_id: int, referencia: date) -> bool:
+        """True si el integrante tiene alguna brigada con fechaInicio > referencia."""
+        condiciones = [
+            IntegranteBrigadaDB.id_integrante == integrante_id,
+            IntegranteBrigadaDB.id_brigada == BrigadaDB.id,
+            BrigadaDB.conglomerado_id == ConglomeradoDB.id,
+            ConglomeradoDB.fechaInicio != None,  # noqa: E711
+            ConglomeradoDB.fechaInicio > referencia,
+        ]
+        stmt = select(IntegranteBrigadaDB).where(and_(*condiciones)).limit(1)
+        res = self.db.exec(stmt).first()
+        return res is not None
+
+    def eliminar(self, integrante_id: int) -> None:
+        """Elimina relaciones IntegranteBrigada y luego el Integrante."""
+        try:
+            self.db.exec(
+                delete(IntegranteBrigadaDB).where(
+                    IntegranteBrigadaDB.id_integrante == integrante_id
+                )
+            )
+            resultado = self.db.exec(
+                delete(IntegranteDB).where(IntegranteDB.id == integrante_id)
+            )
+            if not resultado.rowcount:
+                self.db.rollback()
+                raise ValueError("Integrante no encontrado")
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def ha_sido_asignado(self, integrante_id: int) -> bool:
+        """True si existe alguna fila en IntegranteBrigada para el integrante."""
+        stmt = (
+            select(IntegranteBrigadaDB)
+            .where(IntegranteBrigadaDB.id_integrante == integrante_id)
+            .limit(1)
+        )
+        return self.db.exec(stmt).first() is not None
+
+    def actualizar(self, integrante_id: int, cambios: IntegranteActualizar) -> IntegranteSalida:
+        """Actualiza parcialmente el integrante con los campos provistos.
+
+        Nota: la existencia del integrante ya fue validada en el caso de uso.
+        """
+        datos = cambios.model_dump(exclude_unset=True, exclude_none=True)
+        if not datos:
+            raise ValueError("Debe proporcionar al menos un campo a actualizar")
+
+        try:
+            stmt = (
+                update(IntegranteDB)
+                .where(IntegranteDB.id == integrante_id)
+                .values(**datos)
+            )
+            self.db.exec(stmt)
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
+
+        # Leer entidad actualizada para devolver DTO
+        actualizado = self.db.get(IntegranteDB, integrante_id)
+        return IntegranteSalida.model_validate(actualizado)
+
 
 
 

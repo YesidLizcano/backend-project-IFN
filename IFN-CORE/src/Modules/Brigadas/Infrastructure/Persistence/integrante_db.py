@@ -6,9 +6,12 @@ if TYPE_CHECKING:
     from src.Shared.Infrastructure.Persistence.municipio_db import MunicipioDB
     from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
 
+from src.Modules.Brigadas.Domain.integrante import StatusEnum
+
+
 class IntegranteDB(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    estado: str = Field(default=None)
+    estado: StatusEnum = Field(default=StatusEnum.ACTIVO_DISPONIBLE)
     nombreCompleto: str = Field(default=None)
     jefeBrigada: bool = Field(default=False)
     botanico: bool = Field(default=False)

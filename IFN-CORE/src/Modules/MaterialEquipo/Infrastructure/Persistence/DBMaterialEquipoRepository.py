@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlmodel import Session
+from sqlmodel import Session, delete, select
 from src.Modules.MaterialEquipo.Domain.materialEquipo import (
     MaterialEquipo,
     MaterialEquipoSalida,
@@ -7,6 +7,7 @@ from src.Modules.MaterialEquipo.Domain.materialEquipo import (
 )
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.materialEquipo_db import MaterialEquipoDB
+from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
 from src.Shared.Infrastructure.Persistence.database import get_session
 
 
@@ -38,8 +39,13 @@ class DBMaterialEquipoRepository(MaterialEquipoRepository):
         if not datos:
             raise ValueError("Debe proporcionar al menos un campo a actualizar")
 
-        if "cantidad" in datos and datos["cantidad"] is not None and datos["cantidad"] < 0:
-            raise ValueError("La cantidad no puede ser negativa")
+    # VALIDACIÓN CORRECTA DE CANTIDAD (sumar/restar)
+        if "cantidad" in datos:
+            nueva_cantidad = db_material.cantidad + datos["cantidad"]
+            if nueva_cantidad < 0:
+                raise ValueError("La cantidad resultante no puede ser negativa")
+            
+            datos["cantidad"] = nueva_cantidad
 
         for campo, valor in datos.items():
             setattr(db_material, campo, valor)
@@ -53,6 +59,36 @@ class DBMaterialEquipoRepository(MaterialEquipoRepository):
             raise
 
         return MaterialEquipoSalida.model_validate(db_material)
+
+    def eliminar(self, material_equipo_id: int) -> None:
+        """Elimina el material/equipo y sus asignaciones de control asociadas."""
+        try:
+            self.db.exec(
+                delete(ControlEquipoDB).where(
+                    ControlEquipoDB.id_material_equipo == material_equipo_id
+                )
+            )
+            resultado = self.db.exec(
+                delete(MaterialEquipoDB).where(MaterialEquipoDB.id == material_equipo_id)
+            )
+            if not resultado.rowcount:
+                self.db.rollback()
+                raise ValueError("Material/Equipo no encontrado")
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def buscar_por_nombre_y_departamento(
+        self, nombre: str, departamento_id: int
+    ) -> MaterialEquipoSalida | None:
+        stmt = (
+            select(MaterialEquipoDB)
+            .where(MaterialEquipoDB.nombre == nombre)
+            .where(MaterialEquipoDB.departamento_id == departamento_id)
+        )
+        db_item = self.db.exec(stmt).first()
+        return MaterialEquipoSalida.model_validate(db_item) if db_item else None
     
 def get_material_equipo_repository(
     session: Session = Depends(get_session),

@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import Depends
 from sqlmodel import Session, select, func, col
 from src.Modules.MaterialEquipo.Domain.controlEquipo import ControlEquipo, ControlEquipoGuardar
@@ -56,8 +57,7 @@ class DBControlEquipoRepository(ControlEquipoRepository):
             .where(
                 ControlEquipoDB.id_material_equipo == MaterialEquipoDB.id,
                 ControlEquipoDB.fecha_Inicio_Asignacion <= fecha_inicio,
-                (ControlEquipoDB.fecha_Fin_Asignacion.is_(None)) | 
-                (ControlEquipoDB.fecha_Fin_Asignacion >= fecha_inicio)
+                ControlEquipoDB.fecha_Fin_Asignacion >= fecha_inicio
             )
             .correlate(MaterialEquipoDB)
             .scalar_subquery()
@@ -75,6 +75,22 @@ class DBControlEquipoRepository(ControlEquipoRepository):
         
         result = self.db.exec(query).first()
         return result if result is not None else 0
+
+    def contar_asignado_desde_hoy(self, id_material_equipo: int) -> int:
+        """
+        Suma la cantidad asignada para un material cuando hoy está dentro del rango
+        [fecha_Inicio_Asignacion, fecha_Fin_Asignacion] (o sin fecha fin).
+        """
+        hoy = date.today()
+        query = select(
+            func.coalesce(func.sum(ControlEquipoDB.cantidad_asignada), 0)
+        ).where(
+            ControlEquipoDB.id_material_equipo == id_material_equipo,
+            ControlEquipoDB.fecha_Inicio_Asignacion <= hoy,
+            ControlEquipoDB.fecha_Fin_Asignacion >= hoy,
+        )
+        result = self.db.exec(query).first()
+        return int(result or 0)
 
 
 def get_control_equipo_repository(

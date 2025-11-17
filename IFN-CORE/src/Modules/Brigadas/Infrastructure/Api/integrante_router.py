@@ -6,6 +6,9 @@ from datetime import date
 from src.Modules.Brigadas.Application.integrante_crear import CrearIntegrante
 from src.Modules.Brigadas.Application.integrante_listar_por_region import IntegranteListarPorRegion
 from src.Modules.Brigadas.Application.integrante_listar_por_brigada import IntegranteListarPorBrigada
+from src.Modules.Brigadas.Application.integrante_eliminar import EliminarIntegrante
+from src.Modules.Brigadas.Application.integrante_actualizar import ActualizarIntegrante
+from src.Modules.Brigadas.Domain.integrante import IntegranteActualizar
 from src.Modules.Brigadas.Domain.integrante import IntegranteCrear, IntegranteSalida
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
@@ -97,3 +100,54 @@ async def listar_integrantes_por_brigada(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al listar integrantes por brigada: {str(e)}"
         )
+
+
+@router.patch(
+    "/integrantes/{integrante_id}",
+    response_model=IntegranteSalida,
+    status_code=status.HTTP_200_OK,
+)
+async def actualizar_integrante(
+    integrante_id: int,
+    cambios: IntegranteActualizar,
+    integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+    municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
+):
+    """Actualiza parcialmente un integrante.
+
+    Si el nuevo estado es distinto de ACTIVO_DISPONIBLE, valida que no tenga
+    asignaciones futuras.
+    """
+    try:
+        caso_uso = ActualizarIntegrante(integrante_repo, municipio_repo)
+        actualizado = caso_uso.execute(integrante_id, cambios)
+        return actualizado
+    except ValueError as e:
+        msg = str(e)
+        if "asignaciones futuras" in msg.lower():
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=msg)
+        if "al menos un campo" in msg.lower():
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=msg)
+        if "municipio no encontrado" in msg.lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
+
+
+@router.delete(
+    "/integrantes/{integrante_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def eliminar_integrante(
+    integrante_id: int,
+    integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+):
+    """Elimina un integrante si no tiene asignaciones con fecha de inicio futura."""
+    try:
+        caso_uso = EliminarIntegrante(integrante_repo)
+        caso_uso.execute(integrante_id)
+        return None
+    except ValueError as e:
+        msg = str(e)
+        if "no se puede eliminar" in msg.lower() or "no ha iniciado" in msg.lower():
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=msg)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)

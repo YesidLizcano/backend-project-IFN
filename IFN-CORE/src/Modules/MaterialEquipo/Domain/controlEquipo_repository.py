@@ -27,3 +27,16 @@ class ControlEquipoRepository(ABC):
         Solo considera asignaciones que estén activas en esa fecha específica.
         """
         pass
+
+    @abstractmethod
+    def contar_asignado_desde_hoy(self, id_material_equipo: int) -> int:
+        """
+        Retorna la cantidad total actualmente asignada del material indicado,
+        considerando la fecha de hoy dentro del rango de asignación.
+
+        Se suman los registros en ControlEquipoDB donde:
+        - ControlEquipoDB.id_material_equipo == id_material_equipo
+        - fecha_Inicio_Asignacion <= hoy
+        - fecha_Fin_Asignacion es NULL o fecha_Fin_Asignacion >= hoy
+        """
+        pass

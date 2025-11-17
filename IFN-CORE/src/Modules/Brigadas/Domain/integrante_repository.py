@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 from datetime import date
 
-from src.Modules.Brigadas.Domain.integrante import Integrante, IntegranteSalida
+from src.Modules.Brigadas.Domain.integrante import Integrante, IntegranteSalida, IntegranteActualizar
 
 class IntegranteRepository(ABC):
     @abstractmethod
@@ -39,6 +39,29 @@ class IntegranteRepository(ABC):
     @abstractmethod
     def listar_integrantes_con_y_sin_solapamiento(self, brigada_id: int, fecha_inicio: date, fecha_fin_aprox: date) -> dict:
         """List integrantes partitioned by those with and without overlapping assignments in the given date range."""
+        pass
+
+    @abstractmethod
+    def tiene_asignacion_futura(self, integrante_id: int, referencia: date) -> bool:
+        """Retorna True si el integrante tiene una asignación con fechaInicio > referencia."""
+        pass
+
+    @abstractmethod
+    def eliminar(self, integrante_id: int) -> None:
+        """Elimina un integrante existente por su identificador."""
+        pass
+
+    @abstractmethod
+    def ha_sido_asignado(self, integrante_id: int) -> bool:
+        """
+        Retorna True si el integrante tiene, o ha tenido, al menos una
+        relación en `IntegranteBrigada` (sin importar fechas).
+        """
+        pass
+
+    @abstractmethod
+    def actualizar(self, integrante_id: int, cambios: IntegranteActualizar) -> IntegranteSalida:
+        """Actualiza parcialmente un integrante y devuelve el DTO actualizado."""
         pass
 
     # @abstractmethod

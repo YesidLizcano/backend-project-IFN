@@ -13,6 +13,6 @@ class ControlEquipoDB(SQLModel, table=True):
     id_brigada: int = Field(foreign_key="brigadadb.id")
     cantidad_asignada: int = Field(default=None)
     fecha_Inicio_Asignacion: date = Field(default=None)
-    fecha_Fin_Asignacion: date | None = Field(default=None)
+    fecha_Fin_Asignacion: date = Field(default=None)
     material_equipo: "MaterialEquipoDB" = Relationship(back_populates="control_equipo" )
     brigada: "BrigadaDB" = Relationship(back_populates="control_equipo")

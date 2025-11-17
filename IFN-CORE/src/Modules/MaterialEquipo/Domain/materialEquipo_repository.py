@@ -24,6 +24,18 @@ class MaterialEquipoRepository(ABC):
         """Actualizar parcialmente un material_equipo y devolver el DTO actualizado."""
         pass
 
+    @abstractmethod
+    def eliminar(self, material_equipo_id: int) -> None:
+        """Eliminar un material_equipo existente por su identificador."""
+        pass
+
+    @abstractmethod
+    def buscar_por_nombre_y_departamento(
+        self, nombre: str, departamento_id: int
+    ) -> MaterialEquipoSalida | None:
+        """Buscar un material/equipo por su nombre y departamento."""
+        pass
+
     # @abstractmethod
     # def listar_materiales_equipo(self) -> list[MaterialEquipoSalida]:
     #     """List all materiales_equipo and return them as a list."""

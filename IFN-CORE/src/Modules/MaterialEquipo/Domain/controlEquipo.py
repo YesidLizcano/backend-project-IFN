@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
 
 
 # --- 1. MODELO BASE (Componentes Comunes) ---
@@ -8,7 +7,7 @@ class ControlEquipoBase(BaseModel):
     """Contiene los campos comunes que el usuario provee."""
     cantidad_asignada: int
     fecha_Inicio_Asignacion: date
-    fecha_Fin_Asignacion: Optional[date] = None
+    fecha_Fin_Asignacion: date
     
 
 # --- 2. DTO de CREACIÓN (Entrada de la API) ---
