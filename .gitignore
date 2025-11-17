@@ -1,0 +1,51 @@
+# ----------------------------------------
+# 1. Python Environment (Incluye subdirectorios)
+# ----------------------------------------
+.venv/
+*/.venv/
+
+# Ignorar archivos de caché de Python
+__pycache__/
+*/__pycache__/
+*.pyc
+
+# ----------------------------------------
+# 2. Archivos de Configuración Sensibles
+# ----------------------------------------
+# Excluye todos los archivos .env en la raíz y en cualquier subcarpeta.
+.env
+.env.*
+
+# Excluir específicamente los archivos .env dentro de los servicios para mayor claridad
+AUTH-SERVICE/.env
+IFN-CORE/.env
+
+# ----------------------------------------
+# 3. Credenciales, Claves y Archivos de Servicio
+# ----------------------------------------
+# Firebase / Google Service Account credentials (Do NOT commit)
+.serviceAccountKey.json
+*serviceAccountKey*.json
+*credentials*.json
+firebase-*.json
+*.pem
+*.p12
+
+# Archivos de configuración locales o de desarrollo
+*.local
+
+# ----------------------------------------
+# 4. Archivos de Editor / IDE
+# ----------------------------------------
+# VS Code
+.vscode/
+
+# JetBrains / PyCharm / IntelliJ
+.idea/
+
+# ----------------------------------------
+# 5. Archivos de Docker / Build
+# ----------------------------------------
+# Excluir resultados de compilación
+target/
+build/
