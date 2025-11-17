@@ -3,7 +3,8 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi import Depends
 
 from src.Modules.MaterialEquipo.Application.materialEquipo_crear import CrearMaterialEquipo
-from src.Modules.MaterialEquipo.Domain.materialEquipo import MaterialEquipoCrear, MaterialEquipoSalida
+from src.Modules.MaterialEquipo.Application.materialEquipo_actualizar import ActualizarMaterialEquipo
+from src.Modules.MaterialEquipo.Domain.materialEquipo import MaterialEquipoActualizar, MaterialEquipoCrear, MaterialEquipoSalida
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.DBMaterialEquipoRepository import get_material_equipo_repository
 from src.Shared.Domain.departamento_repository import DepartamentoRepository
@@ -31,3 +32,29 @@ async def crear_material_equipo(
         return saved_material_equipo
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.patch(
+    "/materiales_equipos/{material_equipo_id}",
+    response_model=MaterialEquipoSalida,
+    status_code=status.HTTP_200_OK,
+)
+async def actualizar_material_equipo(
+    material_equipo_id: int,
+    material_equipo_data: MaterialEquipoActualizar,
+    material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
+    departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
+):
+    """Actualiza parcialmente un MaterialEquipo: nombre, cantidad y/o departamento_id."""
+    try:
+        updater = ActualizarMaterialEquipo(material_equipo_repo, departamento_repo)
+        actualizado = updater.execute(material_equipo_id, material_equipo_data)
+        return actualizado
+    except ValueError as e:
+        msg = str(e)
+        status_code = (
+            status.HTTP_400_BAD_REQUEST
+            if "al menos un campo" in msg.lower() or "no puede ser" in msg.lower()
+            else status.HTTP_404_NOT_FOUND
+        )
+        raise HTTPException(status_code=status_code, detail=msg)

@@ -8,8 +8,8 @@ from src.Modules.Conglomerados.Domain.subparcela import SubparcelaSalida
 class ConglomeradoBase(BaseModel):
     """Contiene los campos comunes que el usuario provee."""
     fechaInicio: date
-    fechaFinAprox: date | None
-    fechaFin: date 
+    fechaFinAprox: date
+    fechaFin: date | None
     latitud: float
     longitud: float
 
@@ -27,7 +27,7 @@ class ConglomeradoActualizarFechas(BaseModel):
     DTO para actualizar solo fechaInicio y fechaFinAprox.
     """
     fechaInicio: date
-    fechaFinAprox: date | None
+    fechaFinAprox: date
 
 # --- 3. ENTIDAD DE DOMINIO ---
 class Conglomerado(ConglomeradoBase):
@@ -42,6 +42,8 @@ class ConglomeradoSalida(Conglomerado):
     """
     Hereda la entidad de Dominio y añade los campos generados por la BD.
     """
+    fechaInicio: date | None = None
+    fechaFinAprox: date | None = None
     id: int
     subparcelas: list[SubparcelaSalida] = []
 

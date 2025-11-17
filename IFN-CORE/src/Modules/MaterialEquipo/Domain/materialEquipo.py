@@ -1,7 +1,4 @@
-from datetime import date
 from pydantic import BaseModel
-
-from src.Modules.Conglomerados.Domain.subparcela import SubparcelaSalida
 
 
 # --- 1. MODELO BASE (Componentes Comunes) ---
@@ -25,6 +22,11 @@ class MaterialEquipo(MaterialEquipoBase):
     que son obligatorios en el Dominio.
     """
     departamento_id: int 
+
+class MaterialEquipoActualizar(BaseModel):
+    nombre: str | None = None
+    cantidad: int | None = None  # valores positivos o negativos
+    departamento_id: int | None = None
 
 # --- 4. DTO de SALIDA (Respuesta de la API) ---
 class MaterialEquipoSalida(MaterialEquipo):

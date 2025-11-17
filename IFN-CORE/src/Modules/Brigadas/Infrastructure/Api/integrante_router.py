@@ -5,6 +5,7 @@ from datetime import date
 
 from src.Modules.Brigadas.Application.integrante_crear import CrearIntegrante
 from src.Modules.Brigadas.Application.integrante_listar_por_region import IntegranteListarPorRegion
+from src.Modules.Brigadas.Application.integrante_listar_por_brigada import IntegranteListarPorBrigada
 from src.Modules.Brigadas.Domain.integrante import IntegranteCrear, IntegranteSalida
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
@@ -73,4 +74,26 @@ async def listar_integrantes_por_region(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail=f"Error al listar integrantes por región: {str(e)}"
+        )
+
+
+@router.get(
+    "/integrantes/brigada/{brigada_id}",
+    response_model=List[IntegranteSalida],
+    status_code=status.HTTP_200_OK,
+)
+async def listar_integrantes_por_brigada(
+    brigada_id: int,
+    integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+):
+    """
+    Lista todos los integrantes asociados a una brigada específica.
+    """
+    try:
+        caso_uso = IntegranteListarPorBrigada(integrante_repo)
+        return caso_uso.execute(brigada_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al listar integrantes por brigada: {str(e)}"
         )

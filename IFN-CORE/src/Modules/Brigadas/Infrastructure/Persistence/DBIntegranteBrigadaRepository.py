@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlmodel import Session
+from sqlmodel import Session, delete
 from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada, IntegranteBrigadaCrear
 from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
@@ -16,6 +16,27 @@ class DBIntegranteBrigadaRepository(IntegranteBrigadaRepository):
         self.db.commit()
         self.db.refresh(db_integrante_brigada)
         return IntegranteBrigada.model_validate(db_integrante_brigada)
+
+    def obtener(self, brigada_id: int, integrante_id: int) -> IntegranteBrigada | None:
+        registro = self.db.get(
+            IntegranteBrigadaDB,
+            (brigada_id, integrante_id),
+        )
+        return IntegranteBrigada.model_validate(registro) if registro else None
+
+    def eliminar(
+        self,
+        id_brigada: int,
+        id_integrante: int
+    ) -> None:
+        self.db.exec(
+            delete(IntegranteBrigadaDB).where(
+                IntegranteBrigadaDB.id_brigada == id_brigada,
+                IntegranteBrigadaDB.id_integrante == id_integrante,
+            )
+        )
+        self.db.commit()
+        
 
 def get_integrante_brigada_repository(
     session: Session = Depends(get_session),

@@ -20,6 +20,16 @@ class ConglomeradoRepository(ABC):
         pass
 
     @abstractmethod
-    def actualizar_fechas(self, conglomerado_id: int, fecha_inicio: str, fecha_fin_aprox: str | None) -> ConglomeradoSalida:
-        """Actualizar fechaInicio y fechaFinAprox de un conglomerado."""
+    def actualizar_fechas(
+        self,
+        conglomerado_id: int,
+        fecha_inicio: str | None,
+        fecha_fin_aprox: str | None,
+    ) -> ConglomeradoSalida:
+        """Actualizar o limpiar fechaInicio y fechaFinAprox de un conglomerado."""
+        pass
+
+    @abstractmethod
+    def eliminar(self, conglomerado_id: int) -> None:
+        """Eliminar un conglomerado existente por su identificador."""
         pass

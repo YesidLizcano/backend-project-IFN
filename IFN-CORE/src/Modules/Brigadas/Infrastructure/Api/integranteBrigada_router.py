@@ -8,6 +8,7 @@ from src.Modules.Brigadas.Domain.integrante_repository import IntegranteReposito
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteBrigadaRepository import get_integrante_brigada_repository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBBrigadaRepository import get_brigada_repository
+from src.Modules.Brigadas.Application.integranteBrigada_eliminar import EliminarIntegranteBrigada
 
 
 router = APIRouter(tags=["integranteBrigada"])
@@ -32,3 +33,28 @@ async def asignar_integrante_brigada(
         return saved_brigada
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.delete(
+    "/brigadas/{brigada_id}/integrantes/{integrante_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def eliminar_integrante_de_brigada(
+    brigada_id: int,
+    integrante_id: int,
+    integrante_brigada_repo: IntegranteBrigadaRepository = Depends(get_integrante_brigada_repository),
+    brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
+):
+    """Elimina la relación Integrante-Brigada cumpliendo los mínimos de roles."""
+    try:
+        eliminador = EliminarIntegranteBrigada(
+            integrante_brigada_repository=integrante_brigada_repo,
+            brigada_repository=brigada_repo,
+        )
+        eliminador.execute(brigada_id=brigada_id, integrante_id=integrante_id)
+    except ValueError as e:
+        msg = str(e)
+        status_code = (
+            status.HTTP_409_CONFLICT if "mínimos" in msg.lower() else status.HTTP_404_NOT_FOUND
+        )
+        raise HTTPException(status_code=status_code, detail=msg)

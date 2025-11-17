@@ -1,0 +1,39 @@
+from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
+from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
+from src.Modules.Conglomerados.Domain.subparcela_repository import SubparcelaRepository
+
+
+class EliminarConglomerado:
+    """Caso de uso para eliminar un conglomerado y sus subparcelas."""
+
+    def __init__(
+        self,
+        conglomerado_repository: ConglomeradoRepository,
+        brigada_repository: BrigadaRepository,
+        subparcela_repository: SubparcelaRepository,
+    ) -> None:
+        self.conglomerado_repository = conglomerado_repository
+        self.brigada_repository = brigada_repository
+        self.subparcela_repository = subparcela_repository
+
+    def execute(self, conglomerado_id: int) -> dict:
+        """
+        Elimina el conglomerado solo si no existe una brigada asociada.
+        También remueve todas las subparcelas para evitar residuos.
+        """
+        conglomerado = self.conglomerado_repository.buscar_por_id(conglomerado_id)
+        if conglomerado is None:
+            raise ValueError("Conglomerado no encontrado")
+
+        brigada = self.brigada_repository.buscar_por_conglomerado_id(conglomerado_id)
+        if brigada is not None:
+            self.brigada_repository.eliminar(brigada.id)
+
+        subparcelas_eliminadas = self.subparcela_repository.eliminar_por_conglomerado(
+            conglomerado_id
+        )
+        self.conglomerado_repository.eliminar(conglomerado_id)
+        return {
+            "conglomerado_id": conglomerado_id,
+            "subparcelas_eliminadas": subparcelas_eliminadas,
+        }

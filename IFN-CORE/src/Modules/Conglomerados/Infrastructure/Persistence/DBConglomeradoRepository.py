@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 from fastapi import Depends
 
 # --- Importaciones de Dominio ---
@@ -77,7 +77,12 @@ class DBConglomeradoRepository(ConglomeradoRepository):
         # Mapear cada objeto de BD al DTO de Salida
         return [ConglomeradoSalida.model_validate(db_c) for db_c in db_conglomerados]
 
-    def actualizar_fechas(self, conglomerado_id: int, fecha_inicio: str, fecha_fin_aprox: str | None) -> ConglomeradoSalida:
+    def actualizar_fechas(
+        self,
+        conglomerado_id: int,
+        fecha_inicio: str | None,
+        fecha_fin_aprox: str | None,
+    ) -> ConglomeradoSalida:
         """
         Actualiza fechaInicio y fechaFinAprox de un conglomerado existente.
         """
@@ -102,6 +107,22 @@ class DBConglomeradoRepository(ConglomeradoRepository):
             raise e
         
         return ConglomeradoSalida.model_validate(db_conglomerado)
+
+    def eliminar(self, conglomerado_id: int) -> None:
+        """Elimina el conglomerado siempre que no exista una brigada asociada."""
+        db_conglomerado = self.db.get(ConglomeradoDB, conglomerado_id)
+        if db_conglomerado is None:
+            raise ValueError(f"Conglomerado con ID {conglomerado_id} no encontrado")
+
+        try:
+            self.db.exec(
+                delete(SubparcelaDB).where(SubparcelaDB.conglomerado_id == conglomerado_id)
+            )
+            self.db.delete(db_conglomerado)
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
 
 
 def get_conglomerado_repository(session: Session = Depends(get_session)) -> ConglomeradoRepository:

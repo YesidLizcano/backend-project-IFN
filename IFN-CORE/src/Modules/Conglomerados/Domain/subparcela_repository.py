@@ -4,8 +4,8 @@ from src.Modules.Conglomerados.Domain.subparcela import Subparcela
 
 class SubparcelaRepository(ABC):
     @abstractmethod
-    def guardar(self, municipio_id: int, subparcela: Subparcela) -> Subparcela:
-        """Persist a subparcela for the given municipio_id and return the saved domain entity."""
+    def guardar(self, subparcela: Subparcela) -> Subparcela:
+        """Persist a subparcela and return the saved domain entity."""
         pass
 
     @abstractmethod
@@ -16,4 +16,9 @@ class SubparcelaRepository(ABC):
     @abstractmethod
     def listar_subparcelas(self) -> list[Subparcela]:
         """List all subparcelas and return them as a list."""
+        pass
+
+    @abstractmethod
+    def eliminar_por_conglomerado(self, conglomerado_id: int) -> int:
+        """Eliminar todas las subparcelas asociadas a un conglomerado y retornar cuántas se eliminaron."""
         pass

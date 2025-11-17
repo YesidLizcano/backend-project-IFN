@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 
-from src.Modules.MaterialEquipo.Domain.materialEquipo import MaterialEquipoCrear, MaterialEquipoSalida
+from src.Modules.MaterialEquipo.Domain.materialEquipo import (
+    MaterialEquipoCrear,
+    MaterialEquipoSalida,
+    MaterialEquipoActualizar,
+)
 
 class MaterialEquipoRepository(ABC):
     @abstractmethod
@@ -11,6 +15,13 @@ class MaterialEquipoRepository(ABC):
     @abstractmethod
     def buscar_por_id(self, material_equipo_id: int) -> MaterialEquipoSalida | None:
         """Buscar un material_equipo por su ID. Retorna None si no se encuentra."""
+        pass
+
+    @abstractmethod
+    def actualizar(
+        self, material_equipo_id: int, cambios: MaterialEquipoActualizar
+    ) -> MaterialEquipoSalida:
+        """Actualizar parcialmente un material_equipo y devolver el DTO actualizado."""
         pass
 
     # @abstractmethod
