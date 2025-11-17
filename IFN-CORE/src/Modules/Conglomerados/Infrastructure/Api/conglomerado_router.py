@@ -20,10 +20,12 @@ from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository impo
 from src.Modules.Conglomerados.Application.conglomerado_crear import CrearConglomerado
 from src.Modules.Conglomerados.Application.conglomerado_actualizar_fechas import ActualizarFechasConglomerado
 from src.Modules.Conglomerados.Application.conglomerado_eliminar import EliminarConglomerado
-from src.Shared.Domain.municipio_repository import MunicipioRepository
-from src.Shared.Infrastructure.Persistence.DBMunicipioRepository import (
+from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
+from src.Modules.Ubicacion.Infrastructure.Persistence.DBMunicipioRepository import (
     get_municipio_repository,
 )
+from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
+from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 
 router = APIRouter(tags=["conglomerados"])
 
@@ -37,7 +39,8 @@ async def crear_conglomerado(
     municipio_id: int,
     conglomerado_data: ConglomeradoCrear,
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
-    municipio_repo: MunicipioRepository = Depends(get_municipio_repository)
+    municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     try:
         creator = CrearConglomerado(conglomerado_repo, municipio_repo)
@@ -58,6 +61,7 @@ async def actualizar_fechas_conglomerado(
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
     brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """
     Actualiza las fechas (fechaInicio y fechaFinAprox) de un conglomerado existente.
@@ -103,6 +107,7 @@ async def eliminar_conglomerado(
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
     brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
     subparcela_repo: SubparcelaRepository = Depends(get_subparcela_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Elimina un conglomerado"""
     try:

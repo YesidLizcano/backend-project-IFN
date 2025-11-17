@@ -3,7 +3,7 @@ from typing import List, Tuple, Dict
 
 from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
-from src.Shared.Domain.municipio_repository import MunicipioRepository
+from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
 from src.Modules.MaterialEquipo.Domain.controlEquipo_repository import ControlEquipoRepository
 from src.Modules.MaterialEquipo.Domain.controlEquipo import ControlEquipoGuardar, ControlEquipo

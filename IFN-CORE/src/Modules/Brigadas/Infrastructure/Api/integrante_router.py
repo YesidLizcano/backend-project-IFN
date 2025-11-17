@@ -12,10 +12,12 @@ from src.Modules.Brigadas.Domain.integrante import IntegranteActualizar
 from src.Modules.Brigadas.Domain.integrante import IntegranteCrear, IntegranteSalida
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
-from src.Shared.Domain.municipio_repository import MunicipioRepository
-from src.Shared.Infrastructure.Persistence.DBMunicipioRepository import get_municipio_repository
-from src.Shared.Domain.departamento_repository import DepartamentoRepository
-from src.Shared.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
+from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
+from src.Modules.Ubicacion.Infrastructure.Persistence.DBMunicipioRepository import get_municipio_repository
+from src.Modules.Ubicacion.Domain.departamento_repository import DepartamentoRepository
+from src.Modules.Ubicacion.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
+from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
+from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 
 
 router = APIRouter(tags=["integrantes"])
@@ -30,7 +32,8 @@ async def crear_integrante(
     municipio_id: int,
     integrante_data: IntegranteCrear,
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
-    municipio_repo: MunicipioRepository = Depends(get_municipio_repository)
+    municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     try:
         creator = CrearIntegrante(integrante_repo, municipio_repo)
@@ -52,6 +55,7 @@ async def listar_integrantes_por_region(
     rol: str,
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
     departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """
     Lista todos los integrantes activos que pertenecen a la misma región 
@@ -88,6 +92,7 @@ async def listar_integrantes_por_region(
 async def listar_integrantes_por_brigada(
     brigada_id: int,
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """
     Lista todos los integrantes asociados a una brigada específica.
@@ -112,6 +117,7 @@ async def actualizar_integrante(
     cambios: IntegranteActualizar,
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
     municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Actualiza parcialmente un integrante.
 
@@ -140,6 +146,7 @@ async def actualizar_integrante(
 async def eliminar_integrante(
     integrante_id: int,
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Elimina un integrante si no tiene asignaciones con fecha de inicio futura."""
     try:

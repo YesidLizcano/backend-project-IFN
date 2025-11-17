@@ -5,7 +5,7 @@ from datetime import date
 from src.Modules.Brigadas.Infrastructure.Persistence.brigada_db import BrigadaDB
 
 if TYPE_CHECKING:
-    from src.Shared.Infrastructure.Persistence.municipio_db import MunicipioDB
+    from src.Modules.Ubicacion.Infrastructure.Persistence.municipio_db import MunicipioDB
     from src.Modules.Conglomerados.Infrastructure.Persistence.subparcela_db import SubparcelaDB
 
 class ConglomeradoDB(SQLModel, table=True):

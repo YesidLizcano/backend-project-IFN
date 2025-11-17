@@ -6,7 +6,7 @@ from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.brigada_db import BrigadaDB
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
-from src.Shared.Infrastructure.Persistence.database import get_session
+from src.Shared.database import get_session
 
 
 class DBBrigadaRepository(BrigadaRepository):

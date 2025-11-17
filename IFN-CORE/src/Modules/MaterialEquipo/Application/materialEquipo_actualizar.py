@@ -3,7 +3,7 @@ from src.Modules.MaterialEquipo.Domain.materialEquipo import (
     MaterialEquipoSalida,
 )
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
-from src.Shared.Domain.departamento_repository import DepartamentoRepository
+from src.Modules.Ubicacion.Domain.departamento_repository import DepartamentoRepository
 from src.Modules.MaterialEquipo.Domain.controlEquipo_repository import ControlEquipoRepository
 
 

@@ -2,7 +2,7 @@ from datetime import date
 
 from src.Modules.Brigadas.Domain.integrante import IntegranteActualizar, IntegranteSalida, StatusEnum
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
-from src.Shared.Domain.municipio_repository import MunicipioRepository
+from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
 
 
 class ActualizarIntegrante:

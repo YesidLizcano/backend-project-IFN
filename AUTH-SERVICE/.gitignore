@@ -1,0 +1,22 @@
+# Python env
+.venv/
+__pycache__/
+
+# Env files
+.env
+.env.*
+
+# Local settings
+*.local
+
+# Firebase / Google Service Account credentials (do NOT commit)
+.serviceAccountKey.json
+*serviceAccountKey*.json
+*credentials*.json
+firebase-*.json
+*.pem
+*.p12
+
+# Editor
+.vscode/
+.idea/

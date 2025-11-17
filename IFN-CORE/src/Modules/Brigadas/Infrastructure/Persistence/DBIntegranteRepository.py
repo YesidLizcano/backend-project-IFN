@@ -15,9 +15,9 @@ from src.Modules.Brigadas.Domain.integrante_repository import IntegranteReposito
 from src.Modules.Brigadas.Infrastructure.Persistence.integrante_db import IntegranteDB
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
 from src.Modules.Brigadas.Infrastructure.Persistence.brigada_db import BrigadaDB
-from src.Shared.Infrastructure.Persistence.municipio_db import MunicipioDB
+from src.Modules.Ubicacion.Infrastructure.Persistence.municipio_db import MunicipioDB
 from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import ConglomeradoDB
-from src.Shared.Infrastructure.Persistence.database import get_session
+from src.Shared.database import get_session
 
 
 class DBIntegranteRepository(IntegranteRepository):

@@ -5,11 +5,11 @@ from src.Modules.MaterialEquipo.Domain.controlEquipo import ControlEquipo, Contr
 from src.Modules.MaterialEquipo.Domain.controlEquipo_repository import ControlEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.materialEquipo_db import MaterialEquipoDB
-from src.Shared.Infrastructure.Persistence.departamento_db import DepartamentoDB
-from src.Shared.Infrastructure.Persistence.municipio_db import MunicipioDB
+from src.Modules.Ubicacion.Infrastructure.Persistence.departamento_db import DepartamentoDB
+from src.Modules.Ubicacion.Infrastructure.Persistence.municipio_db import MunicipioDB
 from src.Modules.Brigadas.Infrastructure.Persistence.brigada_db import BrigadaDB
 from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import ConglomeradoDB
-from src.Shared.Infrastructure.Persistence.database import get_session
+from src.Shared.database import get_session
 
 
 class DBControlEquipoRepository(ControlEquipoRepository):

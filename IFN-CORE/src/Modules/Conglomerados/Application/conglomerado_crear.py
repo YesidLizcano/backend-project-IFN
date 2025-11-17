@@ -1,7 +1,7 @@
 from src.Modules.Conglomerados.Domain.conglomerado import Conglomerado, ConglomeradoCrear, ConglomeradoSalida
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
 from src.Modules.Conglomerados.Domain.subparcela import Subparcela
-from src.Shared.Domain.municipio_repository import MunicipioRepository
+from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
 
 from geopy.distance import distance
 from geopy import Point as GeoPoint

@@ -2,8 +2,8 @@ from typing import List
 from datetime import date
 from src.Modules.Brigadas.Domain.integrante import IntegranteSalida
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
-from src.Shared.Domain.departamento_repository import DepartamentoRepository
-from src.Shared.Application.departamento_listar_por_region import DepartamentoListarPorRegion
+from src.Modules.Ubicacion.Domain.departamento_repository import DepartamentoRepository
+from src.Modules.Ubicacion.Application.departamento_listar_por_region import DepartamentoListarPorRegion
 
 
 class IntegranteListarPorRegion:

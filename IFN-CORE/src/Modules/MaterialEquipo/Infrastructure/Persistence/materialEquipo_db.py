@@ -3,7 +3,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
-    from src.Shared.Infrastructure.Persistence.departamento_db import DepartamentoDB
+    from src.Modules.Ubicacion.Infrastructure.Persistence.departamento_db import DepartamentoDB
 
 
 class MaterialEquipoDB(SQLModel, table=True):

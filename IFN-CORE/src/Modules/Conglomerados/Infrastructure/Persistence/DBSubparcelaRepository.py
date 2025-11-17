@@ -4,7 +4,7 @@ from sqlmodel import Session, delete
 from src.Modules.Conglomerados.Domain.subparcela import Subparcela, SubparcelaSalida
 from src.Modules.Conglomerados.Domain.subparcela_repository import SubparcelaRepository
 from src.Modules.Conglomerados.Infrastructure.Persistence.subparcela_db import SubparcelaDB
-from src.Shared.Infrastructure.Persistence.database import get_session
+from src.Shared.database import get_session
 
 
 class DBSubparcelaRepository(SubparcelaRepository):

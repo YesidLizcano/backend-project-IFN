@@ -10,7 +10,7 @@ from src.Modules.Conglomerados.Domain.conglomerado_repository import Conglomerad
 # --- Importaciones de Infraestructura ---
 from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import ConglomeradoDB
 from src.Modules.Conglomerados.Infrastructure.Persistence.subparcela_db import SubparcelaDB
-from src.Shared.Infrastructure.Persistence.database import get_session
+from src.Shared.database import get_session
 
 
 class DBConglomeradoRepository(ConglomeradoRepository):

@@ -8,7 +8,7 @@ from src.Modules.MaterialEquipo.Domain.materialEquipo import (
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.materialEquipo_db import MaterialEquipoDB
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
-from src.Shared.Infrastructure.Persistence.database import get_session
+from src.Shared.database import get_session
 
 
 class DBMaterialEquipoRepository(MaterialEquipoRepository):

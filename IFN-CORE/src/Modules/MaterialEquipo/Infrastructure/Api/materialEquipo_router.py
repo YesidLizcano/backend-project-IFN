@@ -8,10 +8,12 @@ from src.Modules.MaterialEquipo.Application.materialEquipo_eliminar import Elimi
 from src.Modules.MaterialEquipo.Domain.materialEquipo import MaterialEquipoActualizar, MaterialEquipoCrear, MaterialEquipoSalida
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.DBMaterialEquipoRepository import get_material_equipo_repository
-from src.Shared.Domain.departamento_repository import DepartamentoRepository
-from src.Shared.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
+from src.Modules.Ubicacion.Domain.departamento_repository import DepartamentoRepository
+from src.Modules.Ubicacion.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
 from src.Modules.MaterialEquipo.Domain.controlEquipo_repository import ControlEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.DBControlEquipoRepository import get_control_equipo_repository
+from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
+from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 
 
 
@@ -27,7 +29,8 @@ async def crear_material_equipo(
     departamento_id: int,
     material_equipo_data: MaterialEquipoCrear,
     material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
-    departamento_repo: DepartamentoRepository = Depends(get_departamento_repository)
+    departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     try:
         creator = CrearMaterialEquipo(material_equipo_repo, departamento_repo)
@@ -48,6 +51,7 @@ async def actualizar_material_equipo(
     material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
     departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
     control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Actualiza parcialmente un MaterialEquipo: nombre, cantidad y/o departamento_id."""
     try:
@@ -76,6 +80,7 @@ async def eliminar_material_equipo(
     material_equipo_id: int,
     material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
     control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Elimina un Material/Equipo si no tiene asignaciones activas desde hoy."""
     try:

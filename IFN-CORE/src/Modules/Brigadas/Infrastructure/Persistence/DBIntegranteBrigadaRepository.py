@@ -3,7 +3,7 @@ from sqlmodel import Session, delete
 from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada, IntegranteBrigadaCrear
 from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
-from src.Shared.Infrastructure.Persistence.database import get_session
+from src.Shared.database import get_session
 
 
 class DBIntegranteBrigadaRepository(IntegranteBrigadaRepository):

@@ -9,6 +9,8 @@ from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteBrigadaReposito
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBBrigadaRepository import get_brigada_repository
 from src.Modules.Brigadas.Application.integranteBrigada_eliminar import EliminarIntegranteBrigada
+from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
+from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 
 
 router = APIRouter(tags=["integranteBrigada"])
@@ -26,6 +28,7 @@ async def asignar_integrante_brigada(
     integrante_brigada_repo: IntegranteBrigadaRepository = Depends(get_integrante_brigada_repository),
     brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     try:
         creator = CrearIntegranteBrigada(integrante_brigada_repo, brigada_repo, integrante_repo)
@@ -44,6 +47,7 @@ async def eliminar_integrante_de_brigada(
     integrante_id: int,
     integrante_brigada_repo: IntegranteBrigadaRepository = Depends(get_integrante_brigada_repository),
     brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Elimina la relación Integrante-Brigada cumpliendo los mínimos de roles."""
     try:

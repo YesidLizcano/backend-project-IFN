@@ -7,6 +7,8 @@ from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBBrigadaRepository import get_brigada_repository
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
 from src.Modules.Conglomerados.Infrastructure.Persistence.DBConglomeradoRepository import get_conglomerado_repository
+from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
+from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 
 
 router = APIRouter(tags=["brigadas"])
@@ -21,7 +23,8 @@ async def crear_brigada(
     conglomerado_id: int,
     brigada_data: BrigadaCrear,
     brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
-    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository)
+    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     try:
         creator = CrearBrigada(brigada_repo, conglomerado_repo)
@@ -39,6 +42,7 @@ async def eliminar_brigada(
     brigada_id: int,
     brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Elimina una brigada existente por su identificador."""
     try:

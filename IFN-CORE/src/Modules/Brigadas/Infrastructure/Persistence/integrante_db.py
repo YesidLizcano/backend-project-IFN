@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 
 if TYPE_CHECKING:
-    from src.Shared.Infrastructure.Persistence.municipio_db import MunicipioDB
+    from src.Modules.Ubicacion.Infrastructure.Persistence.municipio_db import MunicipioDB
     from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
 
 from src.Modules.Brigadas.Domain.integrante import StatusEnum
