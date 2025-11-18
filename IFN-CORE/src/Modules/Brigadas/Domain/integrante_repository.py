@@ -63,8 +63,3 @@ class IntegranteRepository(ABC):
     def actualizar(self, integrante_id: int, cambios: IntegranteActualizar) -> IntegranteSalida:
         """Actualiza parcialmente un integrante y devuelve el DTO actualizado."""
         pass
-
-    # @abstractmethod
-    # def listar_integrantes(self) -> list[IntegranteSalida]:
-    #     """List all integrantes and return them as a list."""
-    #     pass

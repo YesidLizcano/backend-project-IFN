@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.Modules.Ubicacion.Application.municipio_crear import CrearMunicipio
+from src.Modules.Ubicacion.Application.municipio_listar import ListarMunicipios
 from src.Modules.Ubicacion.Domain.departamento_repository import DepartamentoRepository
 from src.Modules.Ubicacion.Domain.municipio import MunicipioCrear, MunicipioSalida
 from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
@@ -44,4 +45,6 @@ async def listar_municipios(
     municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
-    return municipio_repo.listar_municipios()
+    """Lista todos los municipios utilizando el caso de uso de Application."""
+    lister = ListarMunicipios(municipio_repo)
+    return lister.execute()

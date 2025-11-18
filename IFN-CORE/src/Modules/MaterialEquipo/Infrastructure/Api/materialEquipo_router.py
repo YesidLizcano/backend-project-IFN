@@ -5,6 +5,9 @@ from fastapi import Depends
 from src.Modules.MaterialEquipo.Application.materialEquipo_crear import CrearMaterialEquipo
 from src.Modules.MaterialEquipo.Application.materialEquipo_actualizar import ActualizarMaterialEquipo
 from src.Modules.MaterialEquipo.Application.materialEquipo_eliminar import EliminarMaterialEquipo
+from src.Modules.MaterialEquipo.Application.materialEquipo_listar import (
+    ListarMaterialesEquipo,
+)
 from src.Modules.MaterialEquipo.Domain.materialEquipo import MaterialEquipoActualizar, MaterialEquipoCrear, MaterialEquipoSalida
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.DBMaterialEquipoRepository import get_material_equipo_repository
@@ -95,3 +98,18 @@ async def eliminar_material_equipo(
         if "no se puede eliminar" in msg.lower() or "asignadas" in msg.lower():
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=msg)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
+
+
+@router.get(
+    "/materiales_equipos",
+    response_model=list[MaterialEquipoSalida],
+    status_code=status.HTTP_200_OK,
+)
+async def listar_materiales_equipo(
+    departamento_id: int,
+    material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
+):
+    """Lista materiales/equipos filtrando por `departamento_id` (query param)."""
+    lister = ListarMaterialesEquipo(material_equipo_repo)
+    return lister.execute(departamento_id)

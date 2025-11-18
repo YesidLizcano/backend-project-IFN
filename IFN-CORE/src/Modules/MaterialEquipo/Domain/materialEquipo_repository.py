@@ -36,7 +36,14 @@ class MaterialEquipoRepository(ABC):
         """Buscar un material/equipo por su nombre y departamento."""
         pass
 
-    # @abstractmethod
-    # def listar_materiales_equipo(self) -> list[MaterialEquipoSalida]:
-    #     """List all materiales_equipo and return them as a list."""
-    #     pass
+    @abstractmethod
+    def listar_materiales_equipo(self, departamento_id: int) -> list[MaterialEquipoSalida]:
+        """Listar materiales/equipos por `departamento_id`.
+
+        Parameters:
+        departamento_id (int): Identificador del departamento para filtrar.
+
+        Returns:
+        list[MaterialEquipoSalida]: Lista de materiales/equipos del departamento.
+        """
+        pass

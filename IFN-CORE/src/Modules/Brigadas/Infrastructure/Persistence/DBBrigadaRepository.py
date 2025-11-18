@@ -83,6 +83,16 @@ class DBBrigadaRepository(BrigadaRepository):
             self.db.rollback()
             raise
 
+    def listar_brigadas(self) -> list[BrigadaSalida]:
+        """Lista todas las brigadas existentes.
+
+        Returns:
+            list[BrigadaSalida]: Colección de brigadas mapeadas al DTO de salida.
+        """
+        stmt = select(BrigadaDB)
+        resultados = self.db.exec(stmt).all()
+        return [BrigadaSalida.model_validate(b) for b in resultados]
+
     
 def get_brigada_repository(
     session: Session = Depends(get_session),

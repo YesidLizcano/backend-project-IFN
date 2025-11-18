@@ -28,7 +28,7 @@ class BrigadaRepository(ABC):
         """Elimina una brigada existente por su identificador."""
         pass
 
-    # @abstractmethod
-    # def listar_brigadas(self) -> list[BrigadaSalida]:
-    #     """List all brigadas and return them as a list."""
-    #     pass
+    @abstractmethod
+    def listar_brigadas(self) -> list[BrigadaSalida]:
+        """List all brigadas and return them as a list."""
+        pass

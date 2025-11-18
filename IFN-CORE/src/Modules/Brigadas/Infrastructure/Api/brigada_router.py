@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from src.Modules.Brigadas.Application.brigada_crear import CrearBrigada
+from src.Modules.Brigadas.Application.brigada_listar import ListarBrigadas
 from src.Modules.Brigadas.Application.brigada_eliminar import EliminarBrigada
 from src.Modules.Brigadas.Domain.brigada import BrigadaCrear, BrigadaSalida
 from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
@@ -59,3 +60,17 @@ async def eliminar_brigada(
             else status.HTTP_404_NOT_FOUND
         )
         raise HTTPException(status_code=status_code, detail=msg)
+
+
+@router.get(
+    "/brigadas",
+    response_model=list[BrigadaSalida],
+    status_code=status.HTTP_200_OK,
+)
+async def listar_brigadas(
+    brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
+):
+    """Lista todas las brigadas registradas."""
+    listador = ListarBrigadas(brigada_repo)
+    return listador.execute()

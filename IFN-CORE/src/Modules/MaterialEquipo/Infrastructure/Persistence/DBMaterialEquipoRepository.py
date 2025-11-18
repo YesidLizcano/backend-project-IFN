@@ -89,6 +89,21 @@ class DBMaterialEquipoRepository(MaterialEquipoRepository):
         )
         db_item = self.db.exec(stmt).first()
         return MaterialEquipoSalida.model_validate(db_item) if db_item else None
+
+    def listar_materiales_equipo(self, departamento_id: int) -> list[MaterialEquipoSalida]:
+        """Lista materiales/equipos filtrando por departamento.
+
+        Parameters:
+            departamento_id: ID del departamento para filtrar resultados.
+
+        Returns:
+            list[MaterialEquipoSalida]: Materiales/equipos del departamento indicado.
+        """
+        stmt = select(MaterialEquipoDB).where(
+            MaterialEquipoDB.departamento_id == departamento_id
+        )
+        items = self.db.exec(stmt).all()
+        return [MaterialEquipoSalida.model_validate(i) for i in items]
     
 def get_material_equipo_repository(
     session: Session = Depends(get_session),
