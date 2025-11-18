@@ -1,7 +1,18 @@
 from abc import ABC, abstractmethod
+from typing import Any, Optional
 
 class AutenticacionRepository(ABC):
     """Interfaz (Contrato) para la capa de persistencia de autenticación."""
+    @abstractmethod
+    def _buscar_documento_usuario(self, user_email: str) -> Optional[Any]:
+        """
+        Busca el documento del usuario en la fuente de datos por email.
+
+        Retorna un objeto documento de la fuente de datos o None si no existe.
+        (La implementación concreta define el tipo de documento, p.ej. Firestore.)
+        """
+        pass
+
     @abstractmethod
     def obtener_datos_usuario(self, email: str) -> dict:
         """

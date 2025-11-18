@@ -2,31 +2,30 @@ from src.Domain.autenticacion_repository import AutenticacionRepository
 from src.Infrastructure.Core import firebase_config as fb
 
 
-def buscar_documento_usuario(user_email: str):
-    """Busca el documento de usuario en 'users' o 'user' por id = email o por campo 'email'."""
-    # Colecciones a intentar: primero 'users' (convención), luego 'user' (por compatibilidad)
-    for col in ("users", "user"):
-        ref = fb.db.collection(col)
-
-        # 1) Buscar por id de documento = email
-        doc = ref.document(user_email).get()
-        if doc.exists:
-            return doc
-
-        # 2) Buscar por campo 'email' (igualado exacto en minúsculas)
-        try:
-            stream = ref.where('email', '==', user_email).limit(1).stream()
-            found = next(stream, None)
-            if found is not None:
-                return found
-        except Exception:
-            # Si la colección no existe o no hay índices aún, continuar al siguiente intento
-            pass
-
-    return None
-
-
 class FirebaseAuthRepository(AutenticacionRepository):
+    def _buscar_documento_usuario(self, user_email: str):
+        """Busca el documento de usuario en 'users' o 'user' por id=email o por campo 'email'."""
+        # Colecciones a intentar: primero 'users' (convención), luego 'user' (por compatibilidad)
+        for col in ("users", "user"):
+            ref = fb.db.collection(col)
+
+            # 1) Buscar por id de documento = email
+            doc = ref.document(user_email).get()
+            if doc.exists:
+                return doc
+
+            # 2) Buscar por campo 'email' (igualado exacto en minúsculas)
+            try:
+                stream = ref.where('email', '==', user_email).limit(1).stream()
+                found = next(stream, None)
+                if found is not None:
+                    return found
+            except Exception:
+                # Si la colección no existe o no hay índices aún, continuar al siguiente intento
+                pass
+
+        return None
+
     def obtener_datos_usuario(self, email: str) -> dict:
         """Lee Firestore para obtener datos y hash del usuario.
 
@@ -37,7 +36,7 @@ class FirebaseAuthRepository(AutenticacionRepository):
             fb.inicializar_firebase()
 
         user_email = email.strip().lower()
-        doc = buscar_documento_usuario(user_email)
+        doc = self._buscar_documento_usuario(user_email)
         if doc is None:
             raise Exception("Usuario no encontrado")
 
