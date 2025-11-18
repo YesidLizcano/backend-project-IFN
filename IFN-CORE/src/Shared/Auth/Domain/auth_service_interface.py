@@ -14,7 +14,7 @@ class TokenPayload(TypedDict):
 
 
 class AuthServiceInterface(Protocol):
-    """Protocol that describes the behaviour expected from any auth service."""
+    """ProtocolAthat describes the behaviour expected from any auth service."""
 
     def validate_token(self, token: str) -> TokenPayload:
         """Validate a bearer token and return the decoded payload."""

@@ -17,18 +17,32 @@ if not DATABASE_URL:
         "Asegúrate de que existe en el archivo .env y que este se carga correctamente."
     )
 
-engine = create_engine(DATABASE_URL)
+
+class DatabaseManager:
+    """Clase que encapsula la gestión de la base de datos."""
+    
+    _engine = create_engine(DATABASE_URL)
+    
+    @classmethod
+    def get_engine(cls):
+        """Obtiene el engine de la base de datos."""
+        return cls._engine
+    
+    @classmethod
+    def create_all_tables(cls, app: FastAPI):
+        """Crea todas las tablas en la base de datos."""
+        SQLModel.metadata.create_all(cls._engine)
+        yield
+    
+    @classmethod
+    def get_session(cls):
+        """Proporciona una sesión de base de datos."""
+        with Session(cls._engine) as session:
+            yield session
 
 
-
-def create_all_tables(app: FastAPI):
-    SQLModel.metadata.create_all(engine)
-    yield
-
-
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-
+# Alias para compatibilidad con código existente
+engine = DatabaseManager.get_engine()
+create_all_tables = DatabaseManager.create_all_tables
+get_session = DatabaseManager.get_session
 SessionDep = Annotated[Session, Depends(get_session)]

@@ -9,11 +9,11 @@ class DepartamentoRepository(ABC):
         pass
     
     @abstractmethod
-    def buscar_por_id(self, departamento_id: int) -> Departamento | None:
+    def buscar_por_id(self, departamento_id: int) -> DepartamentoSalida | None:
         """Find a departamento by its ID and return the domain entity or None if not found."""
         pass
 
     @abstractmethod
-    def listar_departamentos(self) -> list[Departamento]:
+    def listar_departamentos(self) -> list[DepartamentoSalida]:
         """List all departamentos and return them as a list."""
         pass
