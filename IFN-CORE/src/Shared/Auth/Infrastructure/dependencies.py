@@ -18,18 +18,17 @@ class AuthDependencies:
     _http_bearer = HTTPBearer(auto_error=False)
     _cached_service: AuthServiceInterface | None = None
     
-    @classmethod
-    def get_auth_service(cls) -> AuthServiceInterface:
+    @staticmethod
+    def get_auth_service() -> AuthServiceInterface:
         """Provide a singleton-like AuthService instance for dependency injection."""
-        if cls._cached_service is None:
-            cls._cached_service = AuthServiceHttp()
-        return cls._cached_service
+        if AuthDependencies._cached_service is None:
+            AuthDependencies._cached_service = AuthServiceHttp()
+        return AuthDependencies._cached_service
     
-    @classmethod
+    @staticmethod
     def get_token_payload(
-        cls,
         credentials: HTTPAuthorizationCredentials | None = Depends(_http_bearer),
-        auth_service: AuthServiceInterface = Depends(get_auth_service),
+        auth_service: AuthServiceInterface = Depends(lambda: AuthDependencies.get_auth_service()),
     ) -> TokenPayload:
         """Validate the Authorization header and return the decoded token payload."""
         
@@ -44,6 +43,13 @@ class AuthDependencies:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
 
 
-# Alias de las funciones de clase para usar directamente
-get_auth_service = AuthDependencies.get_auth_service
-get_token_payload = AuthDependencies.get_token_payload
+# Alias de las funciones de clase para usar directamente en Depends
+def get_auth_service() -> AuthServiceInterface:
+    return AuthDependencies.get_auth_service()
+
+
+def get_token_payload(
+    credentials: HTTPAuthorizationCredentials | None = Depends(AuthDependencies._http_bearer),
+    auth_service: AuthServiceInterface = Depends(get_auth_service),
+) -> TokenPayload:
+    return AuthDependencies.get_token_payload(credentials, auth_service)
