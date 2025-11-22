@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 # --- Configuración de Seguridad ---
 # Cargar variables desde .env
 load_dotenv()
-# El bcrypt es necesario para verificar el hash de tu usuario de la base de datos.
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Usar pbkdf2_sha256 para compatibilidad en Render y despliegue
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 # Configuración JWT (desde .env con valores por defecto razonables)
 LLAVE_SECRETA = os.getenv("LLAVE_SECRETA", "SECRET_KEY_DEL_AUTH_SERVICE_CAMBIAR_EN_PROD")
