@@ -1,9 +1,28 @@
+
+import os
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from src.Infrastructure.Api.autenticacion_router import router as auth_router
 from src.Infrastructure.Core.firebase_config import inicializar_firebase
 
 
+
 app = FastAPI(title="AUTH-SERVICE")
+
+# --- Configuración CORS ---
+cors_origins = os.environ.get("CORS_ORIGINS", "*")
+if cors_origins == "*":
+	origins = ["*"]
+else:
+	origins = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+
+app.add_middleware(
+	CORSMiddleware,
+	allow_origins=origins,
+	allow_credentials=True,
+	allow_methods=["*"],
+	allow_headers=["*"],
+)
 
 # Inicialización opcional de servicios core (mock en esta versión)
 inicializar_firebase()
