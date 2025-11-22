@@ -10,15 +10,9 @@ from src.Infrastructure.Core.firebase_config import inicializar_firebase
 app = FastAPI(title="AUTH-SERVICE")
 
 # --- Configuración CORS ---
-cors_origins = os.environ.get("CORS_ORIGINS", "*")
-if cors_origins == "*":
-	origins = ["*"]
-else:
-	origins = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
-
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=origins,
+	allow_origins=["https://ifnfrontend-fgfxukz0p-brayan-lizcanos-projects.vercel.app"],
 	allow_credentials=True,
 	allow_methods=["*"],
 	allow_headers=["*"],
