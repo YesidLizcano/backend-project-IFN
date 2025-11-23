@@ -71,8 +71,10 @@ async def verificar_puntos_en_colombia(
             try:
                 url = f"https://api.opencagedata.com/geocode/v1/json?q={p.lat},{p.lon}&key={api_key}&language=es"
                 resp = await client.get(url, timeout=10)
+                print(resp)
                 if resp.status_code == 200:
                     data = resp.json()
+                    print(data)
                     if data.get("results"):
                         comp = data["results"][0].get("components", {})
                         departamento = comp.get("state", "No Encontrado")
