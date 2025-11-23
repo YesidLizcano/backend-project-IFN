@@ -30,5 +30,5 @@ app.include_router(controlEquipo_router.router)
 # Endpoint raíz para verificación
 @app.get("/")
 def read_root():
-	return {"message": "AUTH-SERVICE is running"}
+	return {"message": "IFN-CORE is running"}
 
