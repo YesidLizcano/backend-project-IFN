@@ -43,7 +43,8 @@ router = APIRouter(tags=["conglomerados"])
 # ...existing code...
 
 
-@router.post("/conglomerados/verificar-en-colombia", response_model=list)
+
+@router.post("/conglomerados/verificar-en-colombia", response_model=List[dict])
 async def verificar_puntos_en_colombia(
     body: VerificarPuntosRequest,
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
@@ -81,7 +82,13 @@ async def verificar_puntos_en_colombia(
                 municipio = "No Encontrado"
                 departamento = "No Encontrado"
                 region = "No Encontrado"
-            resultados.append([p.lat, p.lon, departamento, municipio, region])
+            resultados.append({
+                "lat": p.lat,
+                "lon": p.lon,
+                "departamento": departamento,
+                "municipio": municipio,
+                "region": region
+            })
     return resultados
 
 
