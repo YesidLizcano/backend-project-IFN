@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Final
 
 import httpx
+import os
 
 from src.Shared.Auth.Domain.auth_service_interface import (
     AbstractAuthService,
@@ -17,10 +18,12 @@ class AuthServiceHttp(AbstractAuthService):
 
     def __init__(
         self,
-        base_url: str = "http://127.0.0.1:8001",
+        base_url: str = None,
         validate_token_path: str = "/auth/validar-token",
         timeout_seconds: float = 5.0,
     ) -> None:
+        if base_url is None:
+            base_url = os.environ.get("AUTH_SERVICE_URL")
         self._base_url: Final[str] = base_url.rstrip("/")
         self._validate_token_path: Final[str] = validate_token_path
         self._timeout_seconds: Final[float] = timeout_seconds
