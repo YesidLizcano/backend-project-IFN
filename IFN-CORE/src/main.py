@@ -13,7 +13,7 @@ app = FastAPI(lifespan=create_all_tables)
 # --- Configuración CORS ---
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=["https://ifnfrontend.vercel.app/"],
+	allow_origins=["https://ifnfrontend-mpm83c2ip-brayan-lizcanos-projects.vercel.app"],
 	allow_credentials=True,
 	allow_methods=["*"],
 	allow_headers=["*"],
