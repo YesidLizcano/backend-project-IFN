@@ -31,8 +31,13 @@ from src.Modules.Ubicacion.Infrastructure.Persistence.DBDepartamentoRepository i
 from src.Modules.Conglomerados.Application.conglomerado_actualizar_fechas import ActualizarFechasConglomerado
 from src.Modules.Conglomerados.Application.conglomerado_eliminar import EliminarConglomerado
 from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
+from src.Modules.Ubicacion.Domain.municipio import MunicipioCrear, Municipio
+from src.Modules.Ubicacion.Domain.departamento_repository import DepartamentoRepository
 from src.Modules.Ubicacion.Infrastructure.Persistence.DBMunicipioRepository import (
     get_municipio_repository,
+)
+from src.Modules.Ubicacion.Infrastructure.Persistence.DBDepartamentoRepository import (
+    get_departamento_repository,
 )
 from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
 from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
@@ -103,20 +108,31 @@ async def verificar_puntos_en_colombia(
 
 
 @router.post(
-    "/conglomerados/{municipio_id}",
+    "/conglomerados/municipio/{municipio_nombre}/departamento/{departamento_nombre}",
     response_model=ConglomeradoSalida,
     status_code=status.HTTP_201_CREATED,
 )
 async def crear_conglomerado(
-    municipio_id: int,
+    municipio_nombre: str,
+    departamento_nombre: str,
     conglomerado_data: ConglomeradoCrear,
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
     municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
+    departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
     try:
+        departamento = departamento_repo.buscar_por_nombre(departamento_nombre)
+        if not departamento:
+            raise ValueError("Departamento no encontrado")
+        municipio = municipio_repo.buscar_por_nombre(municipio_nombre)
+        if not municipio:
+            # Crear municipio si no existe
+            municipio_crear = MunicipioCrear(nombre=municipio_nombre)
+            municipio_entidad = Municipio(nombre=municipio_nombre, departamento_id=departamento.id)
+            municipio = municipio_repo.guardar(municipio_entidad)
         creator = CrearConglomerado(conglomerado_repo, municipio_repo)
-        saved_conglomerado = creator.execute(conglomerado_data, municipio_id)
+        saved_conglomerado = creator.execute(conglomerado_data, municipio.id)
         return saved_conglomerado
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
