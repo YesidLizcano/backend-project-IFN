@@ -7,7 +7,10 @@ from src.Modules.Conglomerados.Domain.conglomerado import (
     Conglomerado, 
     ConglomeradoCrear, 
     ConglomeradoActualizarFechas,
-    ConglomeradoSalida
+    ConglomeradoSalida,
+    PuntoCoords,
+    VerificarPuntosRequest,
+    VerificarPuntosResponse
 )
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
 from src.Modules.Conglomerados.Domain.subparcela_repository import SubparcelaRepository
@@ -18,6 +21,9 @@ from src.Modules.Brigadas.Infrastructure.Persistence.DBBrigadaRepository import 
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
 from src.Modules.Conglomerados.Application.conglomerado_crear import CrearConglomerado
+from fastapi import Body
+from typing import List
+from pydantic import BaseModel
 from src.Modules.Conglomerados.Application.conglomerado_actualizar_fechas import ActualizarFechasConglomerado
 from src.Modules.Conglomerados.Application.conglomerado_eliminar import EliminarConglomerado
 from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
@@ -27,7 +33,23 @@ from src.Modules.Ubicacion.Infrastructure.Persistence.DBMunicipioRepository impo
 from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
 from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 
+
+
 router = APIRouter(tags=["conglomerados"])
+# ...existing code...
+
+@router.post("/conglomerados/verificar-en-colombia", response_model=VerificarPuntosResponse)
+async def verificar_puntos_en_colombia(
+    body: VerificarPuntosRequest,
+    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
+):
+    """
+    Verifica si cada punto (lon, lat) está dentro de Colombia según colombia.geo.json.
+    """
+    # Usar la lógica de conglomerado_en_colombia de CrearConglomerado
+    creator = CrearConglomerado(conglomerado_repo, None)
+    resultados = [creator.conglomerado_en_colombia(p.lon, p.lat) for p in body.puntos]
+    return VerificarPuntosResponse(resultados=resultados)
 
 
 @router.post(

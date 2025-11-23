@@ -49,3 +49,17 @@ class ConglomeradoSalida(Conglomerado):
 
     class Config:
         from_attributes = True
+
+
+# --- MODELOS PARA VERIFICACIÓN DE PUNTOS EN COLOMBIA ---
+from typing import List
+
+class PuntoCoords(BaseModel):
+    lon: float
+    lat: float
+
+class VerificarPuntosRequest(BaseModel):
+    puntos: List[PuntoCoords]
+
+class VerificarPuntosResponse(BaseModel):
+    resultados: List[bool]
