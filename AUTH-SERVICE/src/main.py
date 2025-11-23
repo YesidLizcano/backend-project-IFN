@@ -11,11 +11,11 @@ app = FastAPI(title="AUTH-SERVICE")
 
 # --- Configuración CORS ---
 app.add_middleware(
-	CORSMiddleware,
-	allow_origins=["https://ifnfrontend-fgfxukz0p-brayan-lizcanos-projects.vercel.app"],
-	allow_credentials=True,
-	allow_methods=["*"],
-	allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["https://ifnfrontend-mpm83c2ip-brayan-lizcanos-projects.vercel.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Inicialización opcional de servicios core (mock en esta versión)
