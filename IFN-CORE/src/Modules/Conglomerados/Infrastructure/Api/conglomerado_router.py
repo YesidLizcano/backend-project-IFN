@@ -2,6 +2,11 @@ from fastapi import APIRouter, HTTPException, status
 
 from fastapi import Depends
 import json
+import os
+import httpx
+from fastapi import Body
+from typing import List
+from pydantic import BaseModel
 
 from src.Modules.Conglomerados.Domain.conglomerado import (
     Conglomerado, 
@@ -21,9 +26,8 @@ from src.Modules.Brigadas.Infrastructure.Persistence.DBBrigadaRepository import 
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
 from src.Modules.Conglomerados.Application.conglomerado_crear import CrearConglomerado
-from fastapi import Body
-from typing import List
-from pydantic import BaseModel
+from src.Modules.Ubicacion.Application.departamento_listar_por_region import DepartamentoListarPorRegion
+from src.Modules.Ubicacion.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
 from src.Modules.Conglomerados.Application.conglomerado_actualizar_fechas import ActualizarFechasConglomerado
 from src.Modules.Conglomerados.Application.conglomerado_eliminar import EliminarConglomerado
 from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
@@ -38,18 +42,47 @@ from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 router = APIRouter(tags=["conglomerados"])
 # ...existing code...
 
-@router.post("/conglomerados/verificar-en-colombia", response_model=VerificarPuntosResponse)
+
+@router.post("/conglomerados/verificar-en-colombia", response_model=list)
 async def verificar_puntos_en_colombia(
     body: VerificarPuntosRequest,
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
+    departamento_repo = Depends(get_departamento_repository),
+    token_payload: TokenPayload = Depends(get_token_payload)
 ):
     """
-    Verifica si cada punto (lon, lat) está dentro de Colombia según colombia.geo.json.
+    Verifica si cada punto (lon, lat) está dentro de Colombia y enriquece con municipio/departamento/region usando OpenCage y lógica local.
     """
-    # Usar la lógica de conglomerado_en_colombia de CrearConglomerado
     creator = CrearConglomerado(conglomerado_repo, None)
-    resultados = [creator.conglomerado_en_colombia(p.lon, p.lat) for p in body.puntos]
-    return VerificarPuntosResponse(resultados=resultados)
+    region_helper = DepartamentoListarPorRegion(departamento_repo)
+    api_key = os.environ.get("OPENCAGE_API_KEY")
+    if not api_key:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se configuró OPENCAGE_API_KEY")
+
+    resultados = []
+    async with httpx.AsyncClient() as client:
+        for p in body.puntos:
+            if not creator.conglomerado_en_colombia(p.lon, p.lat):
+                continue
+            municipio = "No Encontrado"
+            departamento = "No Encontrado"
+            region = "No Encontrado"
+            try:
+                url = f"https://api.opencagedata.com/geocode/v1/json?q={p.lat},{p.lon}&key={api_key}&language=es"
+                resp = await client.get(url, timeout=10)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("results"):
+                        comp = data["results"][0].get("components", {})
+                        departamento = comp.get("state", "No Encontrado")
+                        municipio = comp.get("city") or comp.get("town") or comp.get("county") or "No Encontrado"
+                        region = region_helper.obtener_nombre_region(departamento) if departamento != "No Encontrado" else "No Encontrado"
+            except Exception:
+                municipio = "No Encontrado"
+                departamento = "No Encontrado"
+                region = "No Encontrado"
+            resultados.append([p.lat, p.lon, departamento, municipio, region])
+    return resultados
 
 
 @router.post(
