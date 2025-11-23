@@ -1,4 +1,6 @@
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.Modules.Brigadas.Infrastructure.Api import brigada_router, integrante_router, integranteBrigada_router
 from src.Modules.Ubicacion.Infrastructure.Api import departamento_router, municipio_router
@@ -7,6 +9,15 @@ from src.Modules.MaterialEquipo.Infrastructure.Api import controlEquipo_router, 
 from src.Shared.database import create_all_tables
     
 app = FastAPI(lifespan=create_all_tables)
+
+# --- Configuración CORS ---
+app.add_middleware(
+	CORSMiddleware,
+	allow_origins=["https://ifnfrontend-mpm83c2ip-brayan-lizcanos-projects.vercel.app"],
+	allow_credentials=True,
+	allow_methods=["*"],
+	allow_headers=["*"],
+)
 app.include_router(conglomerado_router.router)
 app.include_router(departamento_router.router)
 app.include_router(municipio_router.router)
