@@ -29,10 +29,6 @@ class CrearConglomerado:
         # Validar municipio
         if not self.municipio_repository.buscar_por_id(municipio_id):
             raise ValueError("Municipio no encontrado")
-        
-        # Validar que está en Colombia
-        if not self.conglomerado_en_colombia(conglomerado.longitud, conglomerado.latitud):
-            raise ValueError("El conglomerado debe estar ubicado dentro de los límites de Colombia")
 
         # Preparar objeto de salida
         conglomerado_salida = Conglomerado(
