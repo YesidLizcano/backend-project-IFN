@@ -78,10 +78,20 @@ async def verificar_puntos_en_colombia(
                         departamento = comp.get("state", "No Encontrado")
                         municipio = comp.get("city") or comp.get("town") or comp.get("county") or "No Encontrado"
                         region = region_helper.obtener_nombre_region(departamento) if departamento != "No Encontrado" else "No Encontrado"
-            except Exception:
-                municipio = "No Encontrado"
-                departamento = "No Encontrado"
-                region = "No Encontrado"
+                elif resp.status_code == 402:
+                    # Límite de uso alcanzado
+                    raise HTTPException(status_code=429, detail="Límite de uso de OpenCage alcanzado. Espera o usa otra clave.")
+                elif resp.status_code == 403:
+                    # Clave inválida
+                    raise HTTPException(status_code=502, detail="API Key de OpenCage inválida o bloqueada.")
+                else:
+                    raise HTTPException(status_code=502, detail=f"Error en OpenCage: {resp.status_code}")
+            except httpx.TimeoutException:
+                raise HTTPException(status_code=504, detail="Timeout al consultar OpenCage. Intenta de nuevo más tarde.")
+            except httpx.HTTPError as e:
+                raise HTTPException(status_code=502, detail=f"Error HTTP al consultar OpenCage: {str(e)}")
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error inesperado en la verificación: {str(e)}")
             resultados.append({
                 "lat": p.lat,
                 "lon": p.lon,
