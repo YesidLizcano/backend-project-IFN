@@ -44,12 +44,12 @@ async def crear_integrante(
 
 
 @router.get(
-    "/integrantes/region/{departamento_id}",
+    "/integrantes/region/{departamento_nombre}",
     response_model=List[IntegranteSalida],
     status_code=status.HTTP_200_OK,
 )
 async def listar_integrantes_por_region(
-    departamento_id: int,
+    departamento_nombre: str,
     fechaInicio: date,
     fechaFinAprox: date,
     rol: str,
@@ -67,9 +67,14 @@ async def listar_integrantes_por_region(
         if not fechaInicio or not fechaFinAprox:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Debe proporcionar fechaInicio y fechaFinAprox")
 
+        # Buscar departamento por nombre (insensible a mayúsculas)
+        departamento = departamento_repo.buscar_por_nombre(departamento_nombre)
+        if not departamento:
+            raise ValueError(f"Departamento '{departamento_nombre}' no encontrado")
+
         # Usar el caso de uso de integrantes por región
         caso_uso = IntegranteListarPorRegion(integrante_repo, departamento_repo)
-        integrantes = caso_uso.execute(departamento_id, fechaInicio, fechaFinAprox, rol)
+        integrantes = caso_uso.execute(departamento.id, fechaInicio, fechaFinAprox, rol)
         return integrantes
         
     except ValueError as e:
