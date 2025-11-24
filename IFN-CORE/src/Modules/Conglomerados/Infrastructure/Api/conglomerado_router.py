@@ -151,12 +151,16 @@ async def listar_conglomerados(
                 else:
                     # Si existe brigada, revisar fechas del conglomerado
                     hoy = date.today()
-                    # Priorizar fechaFin (si existe) para estado Finalizado
-                    fecha_fin = getattr(c, "fechaFin", None) or getattr(c, "fechaFinAprox", None)
+                    fecha_fin = getattr(c, "fechaFin", None)
+                    fecha_fin_aprox = getattr(c, "fechaFinAprox", None)
                     fecha_inicio = getattr(c, "fechaInicio", None)
                     try:
+                        # Si ya existe fechaFin registrada y es pasada -> Finalizado
                         if fecha_fin and fecha_fin <= hoy:
                             estado = "Finalizado"
+                        # Si la fechaFinAprox pasó pero no hay fechaFin real -> Pendiente de Cierre
+                        elif fecha_fin_aprox and fecha_fin_aprox <= hoy and not fecha_fin:
+                            estado = "Pendiente de Cierre"
                         elif fecha_inicio and fecha_inicio > hoy:
                             estado = "Asignado"
                         elif fecha_inicio and fecha_inicio <= hoy:
