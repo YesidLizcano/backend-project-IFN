@@ -1,7 +1,7 @@
 from datetime import date
 from pydantic import BaseModel
 
-from src.Modules.Conglomerados.Domain.subparcela import SubparcelaSalida
+# ...existing code... (se removió la dependencia en la salida para evitar acoplamiento innecesario)
 
 
 # --- 1. MODELO BASE (Componentes Comunes) ---
@@ -45,7 +45,6 @@ class ConglomeradoSalida(Conglomerado):
     fechaInicio: date | None = None
     fechaFinAprox: date | None = None
     id: int
-    subparcelas: list[SubparcelaSalida] = []
 
     class Config:
         from_attributes = True
