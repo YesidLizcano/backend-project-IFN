@@ -25,7 +25,9 @@ class DBDepartamentoRepository(DepartamentoRepository):
         return self.db.exec(select(DepartamentoDB)).all()
 
     def buscar_por_nombre(self, nombre: str) -> DepartamentoSalida | None:
-        db_departamento = self.db.exec(select(DepartamentoDB).where(DepartamentoDB.nombre == nombre)).first()
+        db_departamento = self.db.exec(
+            select(DepartamentoDB).where(DepartamentoDB.nombre.ilike(nombre.lower()))
+        ).first()
         return DepartamentoSalida.model_validate(db_departamento) if db_departamento else None
 
 

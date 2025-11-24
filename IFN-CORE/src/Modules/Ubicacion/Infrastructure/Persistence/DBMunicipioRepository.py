@@ -25,6 +25,12 @@ class DBMunicipioRepository(MunicipioRepository):
         municipios_db = self.db.exec(select(MunicipioDB)).all()
         return [MunicipioSalida.model_validate(m) for m in municipios_db]
 
+    def buscar_por_nombre(self, nombre: str) -> MunicipioSalida | None:
+        db_municipio = self.db.exec(
+            select(MunicipioDB).where(MunicipioDB.nombre.ilike(nombre.lower()))
+        ).first()
+        return MunicipioSalida.model_validate(db_municipio) if db_municipio else None
+
 def get_municipio_repository(
     session: Session = Depends(get_session),
 ) -> MunicipioRepository:
