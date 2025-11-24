@@ -7,6 +7,7 @@ import httpx
 from fastapi import Body
 from typing import List
 from pydantic import BaseModel
+from datetime import date
 
 from src.Modules.Conglomerados.Domain.conglomerado import (
     Conglomerado, 
@@ -116,6 +117,7 @@ async def listar_conglomerados(
     conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
     municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
     departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
+    brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Lista conglomerados incluyendo el nombre del municipio y departamento asociados."""
@@ -123,11 +125,13 @@ async def listar_conglomerados(
     region_helper = DepartamentoListarPorRegion(departamento_repo)
     try:
         conglomerados = conglomerado_repo.listar_conglomerados()
+
         for c in conglomerados:
             # c es un DTO ConglomeradoSalida
             municipio_nombre = "No Encontrado"
             departamento_nombre = "No Encontrado"
             region_nombre = "No Encontrado"
+            estado = "Sin Asignar"
             try:
                 municipio = municipio_repo.buscar_por_id(c.municipio_id)
                 if municipio:
@@ -140,6 +144,29 @@ async def listar_conglomerados(
                             region_nombre = region_helper.obtener_nombre_region(departamento_nombre)
                         except Exception:
                             region_nombre = "No Encontrado"
+                # Determinar estado según existencia de brigada y fechas
+                brigada = brigada_repo.buscar_por_conglomerado_id(c.id)
+                if not brigada:
+                    estado = "Sin Asignar"
+                else:
+                    # Si existe brigada, revisar fechas del conglomerado
+                    hoy = date.today()
+                    # Priorizar fechaFin (si existe) para estado Finalizado
+                    fecha_fin = getattr(c, "fechaFin", None) or getattr(c, "fechaFinAprox", None)
+                    fecha_inicio = getattr(c, "fechaInicio", None)
+                    try:
+                        if fecha_fin and fecha_fin <= hoy:
+                            estado = "Finalizado"
+                        elif fecha_inicio and fecha_inicio > hoy:
+                            estado = "Asignado"
+                        elif fecha_inicio and fecha_inicio <= hoy:
+                            estado = "En Exploracion"
+                        else:
+                            # Si no hay fechas claras, considerar asignado
+                            estado = "Asignado"
+                    except Exception:
+                        # En caso de formatos inesperados, mantener asignado
+                        estado = "Asignado"
             except Exception:
                 # Silencioso: mantén valores por defecto si hay error en consulta
                 pass
@@ -150,6 +177,7 @@ async def listar_conglomerados(
                 "municipio_nombre": municipio_nombre,
                 "departamento_nombre": departamento_nombre,
                 "region": region_nombre,
+                "estado": estado,
             })
             resultados.append(data)
 
