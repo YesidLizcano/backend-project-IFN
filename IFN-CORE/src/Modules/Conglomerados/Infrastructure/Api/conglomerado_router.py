@@ -138,7 +138,7 @@ async def listar_conglomerados(
                 pass
 
             # Agregar datos del conglomerado y nombres asociados
-            data = c.model_dump() if hasattr(c, "model_dump") else c.dict()
+            data = c.model_dump() if hasattr(c, "model_dump") else c.model_dump()
             data.update({
                 "municipio_nombre": municipio_nombre,
                 "departamento_nombre": departamento_nombre,
