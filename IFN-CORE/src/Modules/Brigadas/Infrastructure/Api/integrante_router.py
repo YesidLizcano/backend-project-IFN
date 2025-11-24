@@ -52,15 +52,13 @@ async def listar_integrantes_por_region(
     departamento_nombre: str,
     fechaInicio: date,
     fechaFinAprox: date,
-    rol: str,
     integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
     departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """
-    Lista todos los integrantes activos que pertenecen a la misma región 
-    que el departamento especificado, disponibles en el rango de fechas
-    y que tienen el rol especificado.
+    Lista todos los integrantes activos que pertenecen a la misma región
+    que el departamento especificado y que están disponibles en el rango de fechas.
     """
     try:
         # Validación simple: ambas fechas deben venir (FastAPI ya las marca como obligatorias)
@@ -74,7 +72,7 @@ async def listar_integrantes_por_region(
 
         # Usar el caso de uso de integrantes por región
         caso_uso = IntegranteListarPorRegion(integrante_repo, departamento_repo)
-        integrantes = caso_uso.execute(departamento.id, fechaInicio, fechaFinAprox, rol)
+        integrantes = caso_uso.execute(departamento.id, fechaInicio, fechaFinAprox)
         return integrantes
         
     except ValueError as e:
