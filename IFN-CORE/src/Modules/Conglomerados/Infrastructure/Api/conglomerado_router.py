@@ -120,12 +120,14 @@ async def listar_conglomerados(
 ):
     """Lista conglomerados incluyendo el nombre del municipio y departamento asociados."""
     resultados = []
+    region_helper = DepartamentoListarPorRegion(departamento_repo)
     try:
         conglomerados = conglomerado_repo.listar_conglomerados()
         for c in conglomerados:
             # c es un DTO ConglomeradoSalida
             municipio_nombre = "No Encontrado"
             departamento_nombre = "No Encontrado"
+            region_nombre = "No Encontrado"
             try:
                 municipio = municipio_repo.buscar_por_id(c.municipio_id)
                 if municipio:
@@ -133,6 +135,11 @@ async def listar_conglomerados(
                     departamento = departamento_repo.buscar_por_id(municipio.departamento_id)
                     if departamento:
                         departamento_nombre = departamento.nombre
+                        # Obtener región a partir del nombre de departamento
+                        try:
+                            region_nombre = region_helper.obtener_nombre_region(departamento_nombre)
+                        except Exception:
+                            region_nombre = "No Encontrado"
             except Exception:
                 # Silencioso: mantén valores por defecto si hay error en consulta
                 pass
@@ -142,6 +149,7 @@ async def listar_conglomerados(
             data.update({
                 "municipio_nombre": municipio_nombre,
                 "departamento_nombre": departamento_nombre,
+                "region": region_nombre,
             })
             resultados.append(data)
 
