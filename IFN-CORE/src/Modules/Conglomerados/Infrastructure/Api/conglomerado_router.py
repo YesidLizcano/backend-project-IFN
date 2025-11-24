@@ -128,7 +128,6 @@ async def crear_conglomerado(
         municipio = municipio_repo.buscar_por_nombre(municipio_nombre)
         if not municipio:
             # Crear municipio si no existe
-            municipio_crear = MunicipioCrear(nombre=municipio_nombre)
             municipio_entidad = Municipio(nombre=municipio_nombre, departamento_id=departamento.id)
             municipio = municipio_repo.guardar(municipio_entidad)
         creator = CrearConglomerado(conglomerado_repo, municipio_repo)

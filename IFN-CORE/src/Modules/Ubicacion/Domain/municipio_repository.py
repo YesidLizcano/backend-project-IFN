@@ -17,3 +17,8 @@ class MunicipioRepository(ABC):
     def listar_municipios(self) -> list[MunicipioSalida]:
         """List all municipios and return them as a list."""
         pass
+
+    @abstractmethod
+    def buscar_por_nombre(self, nombre: str) -> MunicipioSalida | None:
+        """Find a municipio by its name and return the domain entity or None if not found."""
+        pass

@@ -7,8 +7,8 @@ from src.Modules.Conglomerados.Domain.subparcela import SubparcelaSalida
 # --- 1. MODELO BASE (Componentes Comunes) ---
 class ConglomeradoBase(BaseModel):
     """Contiene los campos comunes que el usuario provee."""
-    fechaInicio: date
-    fechaFinAprox: date
+    fechaInicio: date | None
+    fechaFinAprox: date | None
     fechaFin: date | None
     latitud: float
     longitud: float

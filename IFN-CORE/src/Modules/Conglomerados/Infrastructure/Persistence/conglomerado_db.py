@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
 class ConglomeradoDB(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    fechaInicio: date = Field(default=None)
-    fechaFinAprox: date = Field(default=None)
+    fechaInicio: date | None = Field(default=None)
+    fechaFinAprox: date | None = Field(default=None)
     fechaFin: date | None = Field(default=None)
     municipio_id: int = Field(foreign_key="municipiodb.id")
     latitud: float = Field(default=None)
