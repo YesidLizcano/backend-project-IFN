@@ -107,6 +107,49 @@ async def verificar_puntos_en_colombia(
     return resultados
 
 
+
+@router.get(
+    "/conglomerados",
+    response_model=List[dict],
+)
+async def listar_conglomerados(
+    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
+    municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
+    departamento_repo: DepartamentoRepository = Depends(get_departamento_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
+):
+    """Lista conglomerados incluyendo el nombre del municipio y departamento asociados."""
+    resultados = []
+    try:
+        conglomerados = conglomerado_repo.listar_conglomerados()
+        for c in conglomerados:
+            # c es un DTO ConglomeradoSalida
+            municipio_nombre = "No Encontrado"
+            departamento_nombre = "No Encontrado"
+            try:
+                municipio = municipio_repo.buscar_por_id(c.municipio_id)
+                if municipio:
+                    municipio_nombre = municipio.nombre
+                    departamento = departamento_repo.buscar_por_id(municipio.departamento_id)
+                    if departamento:
+                        departamento_nombre = departamento.nombre
+            except Exception:
+                # Silencioso: mantén valores por defecto si hay error en consulta
+                pass
+
+            # Agregar datos del conglomerado y nombres asociados
+            data = c.model_dump() if hasattr(c, "model_dump") else c.dict()
+            data.update({
+                "municipio_nombre": municipio_nombre,
+                "departamento_nombre": departamento_nombre,
+            })
+            resultados.append(data)
+
+        return resultados
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
 @router.post(
     "/conglomerados/municipio/{municipio_nombre}/departamento/{departamento_nombre}",
     response_model=ConglomeradoSalida,
