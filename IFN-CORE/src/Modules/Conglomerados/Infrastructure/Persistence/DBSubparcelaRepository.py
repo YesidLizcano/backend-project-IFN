@@ -18,6 +18,14 @@ class DBSubparcelaRepository(SubparcelaRepository):
         self.db.refresh(db_subparcela)
         return SubparcelaSalida.model_validate(db_subparcela)
 
+    def buscar_por_id(self, subparcela_id: int) -> SubparcelaSalida | None:
+        db_subparcela = self.db.get(SubparcelaDB, subparcela_id)
+        return SubparcelaSalida.model_validate(db_subparcela) if db_subparcela else None
+
+    def listar_subparcelas(self) -> list[SubparcelaSalida]:
+        registros = self.db.query(SubparcelaDB).all()
+        return [SubparcelaSalida.model_validate(sp) for sp in registros]
+
     def eliminar_por_conglomerado(self, conglomerado_id: int) -> int:
         """Elimina todas las subparcelas asociadas a un conglomerado y retorna la cantidad afectada."""
         resultado = self.db.exec(
