@@ -34,14 +34,23 @@ class ActualizarMaterialEquipo:
             if depto is None:
                 raise ValueError("Departamento no encontrado")
 
-        # Si se actualiza la cantidad, verificar que no quede por debajo de lo ya asignado desde hoy
+        # Si se actualiza la cantidad, aquí la interpretamos como delta (positivo suma, negativo resta).
+        # Validamos que la cantidad resultante no sea negativa y que no quede por debajo
+        # de las unidades ya asignadas desde hoy.
         if cambios.cantidad is not None:
-            if cambios.cantidad < 0:
-                raise ValueError("La cantidad no puede ser negativa")
+            try:
+                delta = int(cambios.cantidad)
+            except Exception:
+                raise ValueError("El campo 'cantidad' debe ser un número entero")
+
+            nueva_cantidad = actual.cantidad + delta
+            if nueva_cantidad < 0:
+                raise ValueError("La cantidad resultante no puede ser negativa")
+
             asignado_hoy = self.control_equipo_repository.contar_asignado_desde_hoy(
                 material_equipo_id
             )
-            if cambios.cantidad < asignado_hoy:
+            if nueva_cantidad < asignado_hoy:
                 raise ValueError(
                     f"No se puede reducir la cantidad por debajo de las unidades asignadas actualmente (asignadas: {asignado_hoy})."
                 )
