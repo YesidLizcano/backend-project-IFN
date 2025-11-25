@@ -21,7 +21,7 @@ class IntegranteListarPorRegion:
         self.integrante_repository = integrante_repository
         self.departamento_repository = departamento_repository
     
-    def execute(self, departamento_id: int, fecha_inicio: date, fecha_fin_aprox: date, rol: str) -> List[IntegranteSalida]:
+    def execute(self, departamento_id: int, fecha_inicio: date, fecha_fin_aprox: date) -> List[IntegranteSalida]:
         """
         Ejecuta el caso de uso para listar integrantes por región.
         
@@ -44,5 +44,5 @@ class IntegranteListarPorRegion:
             raise ValueError(f"No se pudo determinar la región para el departamento {departamento_id}")
         
         # Obtener los integrantes usando el repositorio
-        integrantes = self.integrante_repository.listar_por_region(ids_departamentos, fecha_inicio, fecha_fin_aprox, rol)
+        integrantes = self.integrante_repository.listar_por_region(ids_departamentos, fecha_inicio, fecha_fin_aprox)
         return integrantes

@@ -27,8 +27,8 @@ class IntegranteRepository(ABC):
         pass
     
     @abstractmethod
-    def listar_por_region(self, ids_departamentos: List[int], fecha_inicio: date, fecha_fin_aprox: date, rol: str) -> List[IntegranteSalida]:
-        """Find active integrantes from given departamentos available in [fecha_inicio, fecha_fin_aprox] with the specified rol."""
+    def listar_por_region(self, ids_departamentos: List[int], fecha_inicio: date, fecha_fin_aprox: date) -> List[IntegranteSalida]:
+        """Find active integrantes from given departamentos available in [fecha_inicio, fecha_fin_aprox]."""
         pass
 
     @abstractmethod

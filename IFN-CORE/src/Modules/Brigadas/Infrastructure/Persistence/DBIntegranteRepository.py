@@ -57,7 +57,7 @@ class DBIntegranteRepository(IntegranteRepository):
         db_integrante = self.db.get(IntegranteDB, integrante_id)
         return IntegranteSalida.model_validate(db_integrante) if db_integrante else None
     
-    def listar_por_region(self, ids_departamentos: List[int], fecha_inicio: date, fecha_fin_aprox: date, rol: str) -> List[IntegranteSalida]:
+    def listar_por_region(self, ids_departamentos: List[int], fecha_inicio: date, fecha_fin_aprox: date) -> List[IntegranteSalida]:
         try:
             if not ids_departamentos:
                 return []
@@ -66,21 +66,6 @@ class DBIntegranteRepository(IntegranteRepository):
             asignaciones_superpuestas = self.buscar_asignaciones_superpuestas(
                 IntegranteDB.id, fecha_inicio, fecha_fin_aprox
             )
-
-            # Mapeo de rol a campo booleano en IntegranteDB
-            rol_field_map = {
-                'jefeBrigada': IntegranteDB.jefeBrigada,
-                'botanico': IntegranteDB.botanico,
-                'auxiliar': IntegranteDB.auxiliar,
-                'coinvestigador': IntegranteDB.coinvestigador
-            }
-
-            # Obtener el campo booleano correspondiente al rol
-            rol_field = rol_field_map.get(rol)
-            if rol_field is None:
-                # Si el rol no es válido, retornar lista vacía
-                return []
-
             # Buscar integrantes de municipios en los departamentos dados y que NO tengan traslape de fechas
             stmt = (
                 select(IntegranteDB)
@@ -88,7 +73,6 @@ class DBIntegranteRepository(IntegranteRepository):
                 .where(MunicipioDB.departamento_id.in_(ids_departamentos))
                 .where(IntegranteDB.estado == StatusEnum.ACTIVO_DISPONIBLE)
                 .where(~asignaciones_superpuestas)
-                .where(rol_field == True)  # Verificar que el campo booleano del rol sea True
             )
             
             integrantes_db = self.db.exec(stmt).all()
