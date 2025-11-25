@@ -161,10 +161,10 @@ async def listar_conglomerados(
                         # Si la fechaFinAprox pasó pero no hay fechaFin real -> Pendiente de Cierre
                         elif fecha_fin_aprox and fecha_fin_aprox < hoy and not fecha_fin:
                             estado = "Pendiente de Cierre"
+                        elif fecha_inicio and fecha_inicio <= hoy:
+                            estado = "En Exploracion"                            
                         elif fecha_inicio and fecha_inicio > hoy:
                             estado = "Asignado"
-                        elif fecha_inicio and fecha_inicio < hoy:
-                            estado = "En Exploracion"
                         else:
                             # Si no hay fechas claras, considerar asignado
                             estado = "Asignado"
