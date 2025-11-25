@@ -10,6 +10,6 @@ class IntegranteBrigadaDB(SQLModel, table=True):
     id_brigada: int = Field(foreign_key="brigadadb.id", primary_key=True)
     id_integrante: int = Field(foreign_key="integrantedb.id", primary_key=True)
     rol: str = Field(default=None)
-    brigada: "BrigadaDB" = Relationship(back_populates="integrantes_brigada")
+    brigada: "BrigadaDB" = Relationship(back_populates="integrantes")
     integrante: "IntegranteDB" = Relationship(back_populates="brigadas_integrante")
     
