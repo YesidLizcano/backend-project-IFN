@@ -16,6 +16,11 @@ class CrearMaterialEquipo:
         if not self.departamento_repository.buscar_por_id(departamento_id):
             raise ValueError("Departamento no encontrado")
 
+        if self.material_equipo_repository.buscar_por_nombre_y_departamento(
+            material_equipo.nombre, departamento_id
+        ):
+            raise ValueError(f"El material '{material_equipo.nombre}' ya existe en este departamento")
+
         material_equipo_salida = MaterialEquipo(
             **material_equipo.model_dump(),  # Datos del body
             departamento_id=departamento_id # Asigna el ID de la URL
