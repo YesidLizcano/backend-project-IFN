@@ -1,3 +1,5 @@
+import unicodedata
+
 from fastapi import Depends
 from sqlmodel import Session, select, delete
 from sqlalchemy import func
@@ -92,7 +94,9 @@ class DBBrigadaRepository(BrigadaRepository):
         Returns:
             list[BrigadaSalida]: Colección de brigadas con resumen de integrantes.
         """
-        stmt = select(BrigadaDB).options(selectinload(BrigadaDB.integrantes))
+        stmt = select(BrigadaDB).options(
+            selectinload(BrigadaDB.integrantes).selectinload(IntegranteBrigadaDB.integrante)
+        )
         brigadas_db = self.db.exec(stmt).all()
 
         brigadas_salida = []
@@ -115,10 +119,44 @@ class DBBrigadaRepository(BrigadaRepository):
             }
             roles_counts: dict[str, int] = {rol: 0 for rol in roles_destacados}
 
+            def _normalizar_rol(raw: str | None) -> str:
+                if not raw:
+                    return ""
+                normalizado = unicodedata.normalize("NFKD", raw)
+                ascii_only = normalizado.encode("ascii", "ignore").decode("ascii")
+                clave = ascii_only.lower().replace(" ", "").replace("-", "").replace("_", "")
+                equivalencias = {
+                    "jefebrigada": "jefeBrigada",
+                    "jefe": "jefeBrigada",
+                    "jefedebrigada": "jefeBrigada",
+                    "botanico": "botanico",
+                    "botanica": "botanico",
+                    "botanicos": "botanico",
+                    "botanic": "botanico",
+                    "auxiliar": "auxiliar",
+                    "coinvestigador": "coinvestigador",
+                    "coinvestigadora": "coinvestigador",
+                    "coinvestigadores": "coinvestigador",
+                }
+                return equivalencias.get(clave, "")
+
             for relacion in b_db.integrantes:
-                rol = relacion.rol or ""
-                if rol in roles_counts:
-                    roles_counts[rol] += 1
+                rol_canonico = _normalizar_rol(relacion.rol)
+                if rol_canonico:
+                    roles_counts[rol_canonico] += 1
+                    continue
+
+                integrante = getattr(relacion, "integrante", None)
+                if not integrante:
+                    continue
+                if getattr(integrante, "jefeBrigada", False):
+                    roles_counts["jefeBrigada"] += 1
+                elif getattr(integrante, "botanico", False):
+                    roles_counts["botanico"] += 1
+                elif getattr(integrante, "auxiliar", False):
+                    roles_counts["auxiliar"] += 1
+                elif getattr(integrante, "coinvestigador", False):
+                    roles_counts["coinvestigador"] += 1
 
             resumen_partes: list[str] = []
             for rol, conteo in roles_counts.items():
