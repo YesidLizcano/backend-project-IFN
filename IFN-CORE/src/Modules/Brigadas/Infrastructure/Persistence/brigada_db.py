@@ -14,7 +14,7 @@ class BrigadaDB(SQLModel, table=True):
     fechaCreacion: date = Field(default=None)
     estado: str = Field(default=None)
     conglomerado: "ConglomeradoDB" = Relationship(back_populates="brigada")
-    integrantes_brigada: list["IntegranteBrigadaDB"] = Relationship(back_populates="brigada")
+    integrantes: list["IntegranteBrigadaDB"] = Relationship(back_populates="brigada")
     control_equipo: list["ControlEquipoDB"] = Relationship(back_populates="brigada")
 
 from src.Modules.Brigadas.Infrastructure.Persistence import integranteBrigada_db
