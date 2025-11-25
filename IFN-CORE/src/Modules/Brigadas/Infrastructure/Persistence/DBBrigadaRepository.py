@@ -97,7 +97,8 @@ class DBBrigadaRepository(BrigadaRepository):
         brigadas_salida = []
         for b_db in brigadas_db:
             # Crear el DTO de salida a partir de los datos de la BD
-            b_salida = BrigadaSalida.model_validate(b_db)
+            # Usamos model_dump() para evitar conflicto de tipos en 'integrantes'
+            b_salida = BrigadaSalida.model_validate(b_db.model_dump())
 
             total_integrantes = len(b_db.integrantes)
 

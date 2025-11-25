@@ -32,6 +32,9 @@ class CrearBrigada:
             if not conglomerado:
                 raise ValueError("Conglomerado no encontrado")
 
+            if self.brigada_repository.buscar_por_conglomerado_id(conglomerado_id):
+                raise ValueError(f"El conglomerado {conglomerado_id} ya tiene una brigada asignada")
+
             self._validar_asignaciones(brigada.integrantes_asignados)
 
             self.conglomerado_repository.actualizar_fechas(
