@@ -124,21 +124,19 @@ class DBBrigadaRepository(BrigadaRepository):
                     return ""
                 normalizado = unicodedata.normalize("NFKD", raw)
                 ascii_only = normalizado.encode("ascii", "ignore").decode("ascii")
-                clave = ascii_only.lower().replace(" ", "").replace("-", "").replace("_", "")
-                equivalencias = {
-                    "jefebrigada": "jefeBrigada",
-                    "jefe": "jefeBrigada",
-                    "jefedebrigada": "jefeBrigada",
-                    "botanico": "botanico",
-                    "botanica": "botanico",
-                    "botanicos": "botanico",
-                    "botanic": "botanico",
-                    "auxiliar": "auxiliar",
-                    "coinvestigador": "coinvestigador",
-                    "coinvestigadora": "coinvestigador",
-                    "coinvestigadores": "coinvestigador",
-                }
-                return equivalencias.get(clave, "")
+                clave = (
+                    ascii_only.strip().lower().replace(" ", "").replace("-", "").replace("_", "")
+                )
+
+                if "jefe" in clave and "brigada" in clave:
+                    return "jefeBrigada"
+                if clave.startswith("botanic") or "botanic" in clave:
+                    return "botanico"
+                if clave.startswith("auxiliar") or clave.endswith("auxiliar"):
+                    return "auxiliar"
+                if clave.startswith("coinvestigador") or "coinvestigador" in clave:
+                    return "coinvestigador"
+                return ""
 
             for relacion in b_db.integrantes:
                 rol_canonico = _normalizar_rol(relacion.rol)
@@ -151,11 +149,11 @@ class DBBrigadaRepository(BrigadaRepository):
                     continue
                 if getattr(integrante, "jefeBrigada", False):
                     roles_counts["jefeBrigada"] += 1
-                elif getattr(integrante, "botanico", False):
+                if getattr(integrante, "botanico", False):
                     roles_counts["botanico"] += 1
-                elif getattr(integrante, "auxiliar", False):
+                if getattr(integrante, "auxiliar", False):
                     roles_counts["auxiliar"] += 1
-                elif getattr(integrante, "coinvestigador", False):
+                if getattr(integrante, "coinvestigador", False):
                     roles_counts["coinvestigador"] += 1
 
             resumen_partes: list[str] = []
