@@ -122,25 +122,12 @@ class DBBrigadaRepository(BrigadaRepository):
 
             resumen_partes: list[str] = []
             for rol, conteo in roles_counts.items():
-                if conteo <= 0:
-                    continue
-
                 singular, plural = roles_destacados[rol]
-                if conteo == 1:
-                    resumen_partes.append(singular)
-                else:
-                    resumen_partes.append(f"{conteo} {plural}")
+                etiqueta = singular if conteo == 1 else plural
+                resumen_partes.append(f"{conteo} {etiqueta}")
 
-            if resumen_partes:
-                if len(resumen_partes) == 1:
-                    resumen_roles = resumen_partes[0]
-                elif len(resumen_partes) == 2:
-                    resumen_roles = " y ".join(resumen_partes)
-                else:
-                    resumen_roles = ", ".join(resumen_partes[:-1]) + f" y {resumen_partes[-1]}"
-                resumen_texto = f"Integrantes ({total_integrantes}) | {resumen_roles}"
-            else:
-                resumen_texto = f"Integrantes ({total_integrantes})"
+            resumen_roles = " | ".join(resumen_partes)
+            resumen_texto = f"Integrantes ({total_integrantes}) | {resumen_roles}" if resumen_roles else f"Integrantes ({total_integrantes})"
 
             # Asignar el resumen final al campo 'integrantes'
             b_salida.integrantes = resumen_texto
