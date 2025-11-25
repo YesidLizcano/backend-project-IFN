@@ -8,6 +8,7 @@ from src.Modules.MaterialEquipo.Domain.materialEquipo import (
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.materialEquipo_db import MaterialEquipoDB
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
+from src.Modules.Ubicacion.Infrastructure.Persistence.departamento_db import DepartamentoDB
 from src.Shared.database import get_session
 
 
@@ -90,17 +91,19 @@ class DBMaterialEquipoRepository(MaterialEquipoRepository):
         db_item = self.db.exec(stmt).first()
         return MaterialEquipoSalida.model_validate(db_item) if db_item else None
 
-    def listar_materiales_equipo(self, departamento_id: int) -> list[MaterialEquipoSalida]:
-        """Lista materiales/equipos filtrando por departamento.
+    def listar_materiales_equipo(self, nombre_departamento: str) -> list[MaterialEquipoSalida]:
+        """Lista materiales/equipos filtrando por nombre de departamento.
 
         Parameters:
-            departamento_id: ID del departamento para filtrar resultados.
+            nombre_departamento: Nombre del departamento para filtrar resultados.
 
         Returns:
             list[MaterialEquipoSalida]: Materiales/equipos del departamento indicado.
         """
-        stmt = select(MaterialEquipoDB).where(
-            MaterialEquipoDB.departamento_id == departamento_id
+        stmt = (
+            select(MaterialEquipoDB)
+            .join(DepartamentoDB)
+            .where(DepartamentoDB.nombre == nombre_departamento)
         )
         items = self.db.exec(stmt).all()
         return [MaterialEquipoSalida.model_validate(i) for i in items]

@@ -27,14 +27,14 @@ class ListarMaterialesEquipo:
     def __init__(self, repository: MaterialEquipoRepository) -> None:
         self.repository = repository
 
-    def execute(self, departamento_id: int) -> List[MaterialEquipoSalida]:
+    def execute(self, nombre_departamento: str) -> List[MaterialEquipoSalida]:
         """
         Retorna los materiales/equipos del departamento indicado.
 
         Parameters:
-        - departamento_id: ID del departamento para filtrar resultados.
+        - nombre_departamento: Nombre del departamento para filtrar resultados.
 
         Returns:
         - Lista de `MaterialEquipoSalida`.
         """
-        return self.repository.listar_materiales_equipo(departamento_id)
+        return self.repository.listar_materiales_equipo(nombre_departamento)

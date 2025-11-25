@@ -37,11 +37,11 @@ class MaterialEquipoRepository(ABC):
         pass
 
     @abstractmethod
-    def listar_materiales_equipo(self, departamento_id: int) -> list[MaterialEquipoSalida]:
-        """Listar materiales/equipos por `departamento_id`.
+    def listar_materiales_equipo(self, nombre_departamento: str) -> list[MaterialEquipoSalida]:
+        """Listar materiales/equipos por `nombre_departamento`.
 
         Parameters:
-        departamento_id (int): Identificador del departamento para filtrar.
+        nombre_departamento (str): Nombre del departamento para filtrar.
 
         Returns:
         list[MaterialEquipoSalida]: Lista de materiales/equipos del departamento.

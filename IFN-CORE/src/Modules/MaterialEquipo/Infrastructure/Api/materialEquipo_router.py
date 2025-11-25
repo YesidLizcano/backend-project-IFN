@@ -106,10 +106,10 @@ async def eliminar_material_equipo(
     status_code=status.HTTP_200_OK,
 )
 async def listar_materiales_equipo(
-    departamento_id: int,
+    nombre_departamento: str,
     material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
-    """Lista materiales/equipos filtrando por `departamento_id` (query param)."""
+    """Lista materiales/equipos filtrando por `nombre_departamento` (query param)."""
     lister = ListarMaterialesEquipo(material_equipo_repo)
-    return lister.execute(departamento_id)
+    return lister.execute(nombre_departamento)
