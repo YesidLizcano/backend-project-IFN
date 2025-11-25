@@ -289,9 +289,10 @@ async def eliminar_conglomerado(
         return eliminador.execute(conglomerado_id)
     except ValueError as e:
         msg = str(e)
+        lower_msg = msg.lower()
         status_code = (
             status.HTTP_409_CONFLICT
-            if "brigada asociada" in msg.lower()
+            if any(trigger in lower_msg for trigger in ("brigada asociada", "fecha de inicio"))
             else status.HTTP_404_NOT_FOUND
         )
         raise HTTPException(status_code=status_code, detail=msg)

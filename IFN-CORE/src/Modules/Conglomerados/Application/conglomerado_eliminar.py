@@ -1,3 +1,5 @@
+from datetime import date
+
 from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
 from src.Modules.Conglomerados.Domain.subparcela_repository import SubparcelaRepository
@@ -17,13 +19,16 @@ class EliminarConglomerado:
         self.subparcela_repository = subparcela_repository
 
     def execute(self, conglomerado_id: int) -> dict:
-        """
-        Elimina el conglomerado solo si no existe una brigada asociada.
-        También remueve todas las subparcelas para evitar residuos.
-        """
+        """Elimina el conglomerado únicamente si la fecha de inicio aún no llega."""
         conglomerado = self.conglomerado_repository.buscar_por_id(conglomerado_id)
         if conglomerado is None:
             raise ValueError("Conglomerado no encontrado")
+
+        fecha_inicio = getattr(conglomerado, "fechaInicio", None)
+        if fecha_inicio and fecha_inicio <= date.today():
+            raise ValueError(
+                "No se puede eliminar el conglomerado: la fecha de inicio ya pasó o es hoy."
+            )
 
         brigada = self.brigada_repository.buscar_por_conglomerado_id(conglomerado_id)
         if brigada is not None:
