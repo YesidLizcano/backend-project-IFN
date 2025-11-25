@@ -5,11 +5,16 @@ from src.Modules.Brigadas.Application.brigada_listar import ListarBrigadas
 from src.Modules.Brigadas.Application.brigada_eliminar import EliminarBrigada
 from src.Modules.Brigadas.Domain.brigada import BrigadaCrear, BrigadaSalida
 from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
+from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
+from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBBrigadaRepository import get_brigada_repository
+from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
+from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteBrigadaRepository import get_integrante_brigada_repository
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
 from src.Modules.Conglomerados.Infrastructure.Persistence.DBConglomeradoRepository import get_conglomerado_repository
 from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
 from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
+from src.Shared.database import SessionDep
 
 
 router = APIRouter(tags=["brigadas"])
@@ -23,16 +28,31 @@ router = APIRouter(tags=["brigadas"])
 async def crear_brigada(
     conglomerado_id: int,
     brigada_data: BrigadaCrear,
-    brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
-    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
+    session: SessionDep,
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
+    brigada_repo: BrigadaRepository = get_brigada_repository(session=session)
+    conglomerado_repo: ConglomeradoRepository = get_conglomerado_repository(session=session)
+    integrante_repo: IntegranteRepository = get_integrante_repository(session=session)
+    integrante_brigada_repo: IntegranteBrigadaRepository = get_integrante_brigada_repository(session=session)
     try:
-        creator = CrearBrigada(brigada_repo, conglomerado_repo)
+        creator = CrearBrigada(
+            brigada_repository=brigada_repo,
+            conglomerado_repository=conglomerado_repo,
+            integrante_repository=integrante_repo,
+            integrante_brigada_repository=integrante_brigada_repo,
+            session=session,
+        )
         saved_brigada = creator.execute(brigada_data, conglomerado_id)
         return saved_brigada
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        msg = str(e)
+        status_code = (
+            status.HTTP_404_NOT_FOUND
+            if "no encontrado" in msg.lower()
+            else status.HTTP_400_BAD_REQUEST
+        )
+        raise HTTPException(status_code=status_code, detail=msg)
 
 
 @router.delete(

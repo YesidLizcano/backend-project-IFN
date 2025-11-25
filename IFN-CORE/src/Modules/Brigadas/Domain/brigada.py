@@ -1,7 +1,13 @@
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.Modules.Brigadas.Domain.integrante import IntegranteSalida
+
+
+class AsignacionIntegrante(BaseModel):
+    """Representa la asignación de un integrante a una brigada."""
+    integrante_id: int
+    rol_asignado: str
 
 
 # --- 1. MODELO BASE (Componentes Comunes) ---
@@ -17,7 +23,9 @@ class BrigadaCrear(BrigadaBase):
     Hereda los campos base. Se usa para el cuerpo del POST.
     NO lleva municipio_id ni id.
     """
-    pass
+    fechaInicio: date
+    fechaFinAprox: date
+    integrantes_asignados: list[AsignacionIntegrante] = Field(default_factory=list)
 
 # --- 3. ENTIDAD DE DOMINIO ---
 class Brigada(BrigadaBase):
@@ -33,6 +41,7 @@ class BrigadaSalida(Brigada):
     Hereda la entidad de Dominio y añade los campos generados por la BD.
     """
     id: int
+    integrantes: list[IntegranteSalida] = Field(default_factory=list)
 
     class Config:
         from_attributes = True

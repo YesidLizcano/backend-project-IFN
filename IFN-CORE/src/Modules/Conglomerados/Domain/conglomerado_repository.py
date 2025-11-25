@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from datetime import date
+
 from src.Modules.Conglomerados.Domain.conglomerado import ConglomeradoCrear, ConglomeradoSalida
 from src.Modules.Conglomerados.Domain.subparcela import Subparcela
 
@@ -23,8 +25,10 @@ class ConglomeradoRepository(ABC):
     def actualizar_fechas(
         self,
         conglomerado_id: int,
-        fecha_inicio: str | None,
-        fecha_fin_aprox: str | None,
+        fecha_inicio: date | None,
+        fecha_fin_aprox: date | None,
+        *,
+        commit: bool = True,
     ) -> ConglomeradoSalida:
         """Actualizar o limpiar fechaInicio y fechaFinAprox de un conglomerado."""
         pass

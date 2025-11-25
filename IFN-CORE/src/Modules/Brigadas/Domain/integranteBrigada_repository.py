@@ -1,10 +1,15 @@
 from abc import ABC, abstractmethod
 
-from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada, IntegranteBrigadaCrear
+from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada
 
 class IntegranteBrigadaRepository(ABC):
     @abstractmethod
-    def guardar(self, integrante_brigada: IntegranteBrigadaCrear) -> IntegranteBrigada:
+    def guardar(
+        self,
+        integrante_brigada: IntegranteBrigada,
+        *,
+        commit: bool = True,
+    ) -> IntegranteBrigada:
         """Persist a integranteBrigada and return the saved domain entity."""
         pass
 

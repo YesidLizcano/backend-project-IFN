@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlmodel import Session, select, delete
 from fastapi import Depends
 
@@ -80,8 +82,10 @@ class DBConglomeradoRepository(ConglomeradoRepository):
     def actualizar_fechas(
         self,
         conglomerado_id: int,
-        fecha_inicio: str | None,
-        fecha_fin_aprox: str | None,
+        fecha_inicio: date | None,
+        fecha_fin_aprox: date | None,
+        *,
+        commit: bool = True,
     ) -> ConglomeradoSalida:
         """
         Actualiza fechaInicio y fechaFinAprox de un conglomerado existente.
@@ -96,11 +100,12 @@ class DBConglomeradoRepository(ConglomeradoRepository):
         # Actualizar los campos
         db_conglomerado.fechaInicio = fecha_inicio
         db_conglomerado.fechaFinAprox = fecha_fin_aprox
-        
+
         try:
-            # Guardar los cambios
             self.db.add(db_conglomerado)
-            self.db.commit()
+            self.db.flush()
+            if commit:
+                self.db.commit()
             self.db.refresh(db_conglomerado)
         except Exception as e:
             self.db.rollback()

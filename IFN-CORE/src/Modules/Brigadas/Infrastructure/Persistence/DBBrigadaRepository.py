@@ -13,10 +13,12 @@ class DBBrigadaRepository(BrigadaRepository):
     def __init__(self, db: Session):
         self.db = db
 
-    def guardar(self, brigada: Brigada) -> BrigadaSalida:
+    def guardar(self, brigada: Brigada, *, commit: bool = True) -> BrigadaSalida:
         db_brigada = BrigadaDB(**brigada.model_dump())
         self.db.add(db_brigada)
-        self.db.commit()
+        self.db.flush()
+        if commit:
+            self.db.commit()
         self.db.refresh(db_brigada)
         return BrigadaSalida.model_validate(db_brigada)
     

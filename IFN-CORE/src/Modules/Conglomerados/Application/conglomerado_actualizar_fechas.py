@@ -83,6 +83,6 @@ class ActualizarFechasConglomerado:
         # Si no hay brigada o no hay conflictos, proceder con la actualización
         return self.conglomerado_repository.actualizar_fechas(
             conglomerado_id,
-            str(fechas_data.fechaInicio),
-            str(fechas_data.fechaFinAprox),
+            fechas_data.fechaInicio,
+            fechas_data.fechaFinAprox,
         )
