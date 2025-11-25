@@ -37,11 +37,9 @@ class Brigada(BrigadaBase):
 
 # --- 4. DTO de SALIDA (Respuesta de la API) ---
 class BrigadaSalida(Brigada):
-    """
-    Hereda la entidad de Dominio y añade los campos generados por la BD.
-    """
+    """DTO de salida con soporte para lista detallada o resumen de integrantes."""
     id: int
-    integrantes: str
+    integrantes: str | list[IntegranteSalida] = Field(default_factory=list)
 
     class Config:
         from_attributes = True

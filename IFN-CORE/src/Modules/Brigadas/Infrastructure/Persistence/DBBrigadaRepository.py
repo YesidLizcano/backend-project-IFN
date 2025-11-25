@@ -1,6 +1,7 @@
 from fastapi import Depends
 from sqlmodel import Session, select, delete
 from sqlalchemy import func
+from sqlalchemy.orm import selectinload
 from src.Modules.Brigadas.Domain.brigada import Brigada, BrigadaSalida
 from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.brigada_db import BrigadaDB
@@ -91,7 +92,7 @@ class DBBrigadaRepository(BrigadaRepository):
         Returns:
             list[BrigadaSalida]: Colección de brigadas con resumen de integrantes.
         """
-        stmt = select(BrigadaDB)
+        stmt = select(BrigadaDB).options(selectinload(BrigadaDB.integrantes))
         brigadas_db = self.db.exec(stmt).all()
 
         brigadas_salida = []
@@ -106,23 +107,43 @@ class DBBrigadaRepository(BrigadaRepository):
             total_integrantes = len(b_db.integrantes)
 
             # Contar roles clave para el resumen
-            roles_counts = {"jefeBrigada": 0, "botanico": 0}
-            for i in b_db.integrantes:
-                if i.rol in roles_counts:
-                    roles_counts[i.rol] += 1
+            roles_destacados = {
+                "jefeBrigada": ("Jefe", "Jefes"),
+                "botanico": ("Botánico", "Botánicos"),
+                "auxiliar": ("Auxiliar", "Auxiliares"),
+                "coinvestigador": ("Coinvestigador", "Coinvestigadores"),
+            }
+            roles_counts: dict[str, int] = {rol: 0 for rol in roles_destacados}
 
-            # Construir la cadena de resumen
-            resumen_partes = []
-            if roles_counts["jefeBrigada"] > 0:
-                resumen_partes.append("Jefe")
-            if roles_counts["botanico"] > 0:
-                count = roles_counts["botanico"]
-                resumen_partes.append(f"{count} Botánico{'s' if count > 1 else ''}")
+            for relacion in b_db.integrantes:
+                rol = relacion.rol or ""
+                if rol in roles_counts:
+                    roles_counts[rol] += 1
 
-            resumen_str = " | ".join(resumen_partes)
+            resumen_partes: list[str] = []
+            for rol, conteo in roles_counts.items():
+                if conteo <= 0:
+                    continue
+
+                singular, plural = roles_destacados[rol]
+                if conteo == 1:
+                    resumen_partes.append(singular)
+                else:
+                    resumen_partes.append(f"{conteo} {plural}")
+
+            if resumen_partes:
+                if len(resumen_partes) == 1:
+                    resumen_roles = resumen_partes[0]
+                elif len(resumen_partes) == 2:
+                    resumen_roles = " y ".join(resumen_partes)
+                else:
+                    resumen_roles = ", ".join(resumen_partes[:-1]) + f" y {resumen_partes[-1]}"
+                resumen_texto = f"Integrantes ({total_integrantes}) | {resumen_roles}"
+            else:
+                resumen_texto = f"Integrantes ({total_integrantes})"
 
             # Asignar el resumen final al campo 'integrantes'
-            b_salida.integrantes = f"Integrantes ({total_integrantes}) | {resumen_str}"
+            b_salida.integrantes = resumen_texto
             brigadas_salida.append(b_salida)
 
         return brigadas_salida
