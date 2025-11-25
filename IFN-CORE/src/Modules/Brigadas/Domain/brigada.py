@@ -41,7 +41,7 @@ class BrigadaSalida(Brigada):
     Hereda la entidad de Dominio y añade los campos generados por la BD.
     """
     id: int
-    integrantes: list[IntegranteSalida] = Field(default_factory=list)
+    integrantes: str
 
     class Config:
         from_attributes = True

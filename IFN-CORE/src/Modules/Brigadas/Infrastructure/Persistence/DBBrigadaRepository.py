@@ -86,14 +86,42 @@ class DBBrigadaRepository(BrigadaRepository):
             raise
 
     def listar_brigadas(self) -> list[BrigadaSalida]:
-        """Lista todas las brigadas existentes.
+        """Lista todas las brigadas con un resumen de sus integrantes.
 
         Returns:
-            list[BrigadaSalida]: Colección de brigadas mapeadas al DTO de salida.
+            list[BrigadaSalida]: Colección de brigadas con resumen de integrantes.
         """
         stmt = select(BrigadaDB)
-        resultados = self.db.exec(stmt).all()
-        return [BrigadaSalida.model_validate(b) for b in resultados]
+        brigadas_db = self.db.exec(stmt).all()
+
+        brigadas_salida = []
+        for b_db in brigadas_db:
+            b_salida = BrigadaSalida.model_validate(b_db)
+            
+            total_integrantes = len(b_db.integrantes)
+            
+            roles_resumen = {}
+            for i in b_db.integrantes:
+                rol = i.rol
+                if rol in roles_resumen:
+                    roles_resumen[rol] += 1
+                else:
+                    roles_resumen[rol] = 1
+            
+            resumen_partes = []
+            if "jefeBrigada" in roles_resumen:
+                resumen_partes.append("Jefe")
+            
+            if "botanico" in roles_resumen:
+                count = roles_resumen["botanico"]
+                resumen_partes.append(f"{count} Botánico{'s' if count > 1 else ''}")
+
+            resumen_str = " | ".join(resumen_partes)
+            
+            b_salida.integrantes = f"Integrantes ({total_integrantes}) | {resumen_str}"
+            brigadas_salida.append(b_salida)
+            
+        return brigadas_salida
 
     
 def get_brigada_repository(
