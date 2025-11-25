@@ -12,7 +12,7 @@ from src.Modules.Brigadas.Domain.integrante import IntegranteActualizar
 from src.Modules.Brigadas.Domain.integrante import IntegranteCrear, IntegranteSalida
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
-from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada
+from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigadaRolSalida
 from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteBrigadaRepository import (
     get_integrante_brigada_repository,
@@ -94,7 +94,7 @@ async def listar_integrantes_por_region(
 
 @router.get(
     "/integrantes/brigada/{brigada_id}",
-    response_model=List[IntegranteBrigada],
+    response_model=List[IntegranteBrigadaRolSalida],
     status_code=status.HTTP_200_OK,
 )
 async def listar_integrantes_por_brigada(

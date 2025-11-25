@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 
-from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada
+from src.Modules.Brigadas.Domain.integranteBrigada import (
+    IntegranteBrigada,
+    IntegranteBrigadaRolSalida,
+)
 
 class IntegranteBrigadaRepository(ABC):
     @abstractmethod
@@ -19,8 +22,8 @@ class IntegranteBrigadaRepository(ABC):
         pass
 
     @abstractmethod
-    def listar_por_brigada(self, brigada_id: int) -> list[IntegranteBrigada]:
-        """Retorna las relaciones de integrantes asignados a la brigada indicada."""
+    def listar_por_brigada(self, brigada_id: int) -> list[IntegranteBrigadaRolSalida]:
+        """Retorna el rol y datos básicos de los integrantes asignados a la brigada indicada."""
         pass
 
     @abstractmethod

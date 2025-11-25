@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from src.Modules.Brigadas.Domain.integrante import StatusEnum
 from src.Modules.Conglomerados.Domain.subparcela import SubparcelaSalida
 
 
@@ -29,3 +30,14 @@ class IntegranteBrigada(IntegranteBrigadaBase):
 
     class Config:
         from_attributes = True
+
+
+class IntegranteBrigadaRolSalida(BaseModel):
+    """Representa el rol asignado y datos básicos del integrante dentro de una brigada."""
+    id_brigada: int
+    id_integrante: int
+    rol: str | None = None
+    nombreCompleto: str | None = None
+    telefono: str | None = None
+    email: str | None = None
+    estado: StatusEnum | None = None

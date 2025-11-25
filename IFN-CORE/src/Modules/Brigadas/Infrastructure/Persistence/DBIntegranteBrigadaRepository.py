@@ -1,8 +1,12 @@
 from fastapi import Depends
 from sqlmodel import Session, delete, select
-from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada
+from src.Modules.Brigadas.Domain.integranteBrigada import (
+    IntegranteBrigada,
+    IntegranteBrigadaRolSalida,
+)
 from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
+from src.Modules.Brigadas.Infrastructure.Persistence.integrante_db import IntegranteDB
 from src.Shared.database import get_session
 
 
@@ -44,11 +48,27 @@ class DBIntegranteBrigadaRepository(IntegranteBrigadaRepository):
         )
         self.db.commit()
 
-    def listar_por_brigada(self, brigada_id: int) -> list[IntegranteBrigada]:
-        registros = self.db.exec(
-            select(IntegranteBrigadaDB).where(IntegranteBrigadaDB.id_brigada == brigada_id)
+    def listar_por_brigada(self, brigada_id: int) -> list[IntegranteBrigadaRolSalida]:
+        resultados = self.db.exec(
+            select(IntegranteBrigadaDB, IntegranteDB)
+            .join(IntegranteDB, IntegranteBrigadaDB.id_integrante == IntegranteDB.id)
+            .where(IntegranteBrigadaDB.id_brigada == brigada_id)
         ).all()
-        return [IntegranteBrigada.model_validate(r) for r in registros]
+
+        salidas: list[IntegranteBrigadaRolSalida] = []
+        for relacion_db, integrante_db in resultados:
+            salidas.append(
+                IntegranteBrigadaRolSalida(
+                    id_brigada=relacion_db.id_brigada,
+                    id_integrante=relacion_db.id_integrante,
+                    rol=relacion_db.rol,
+                    nombreCompleto=integrante_db.nombreCompleto,
+                    telefono=integrante_db.telefono,
+                    email=integrante_db.email,
+                    estado=integrante_db.estado,
+                )
+            )
+        return salidas
         
 
 def get_integrante_brigada_repository(
