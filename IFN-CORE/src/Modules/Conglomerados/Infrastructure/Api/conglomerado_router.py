@@ -163,7 +163,7 @@ async def listar_conglomerados(
                             estado = "Pendiente de Cierre"
                         elif fecha_inicio and fecha_inicio > hoy:
                             estado = "Asignado"
-                        elif fecha_inicio and fecha_inicio <= hoy:
+                        elif fecha_inicio and fecha_inicio < hoy:
                             estado = "En Exploracion"
                         else:
                             # Si no hay fechas claras, considerar asignado
