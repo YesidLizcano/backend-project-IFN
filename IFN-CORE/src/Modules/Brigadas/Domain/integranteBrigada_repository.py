@@ -19,6 +19,11 @@ class IntegranteBrigadaRepository(ABC):
         pass
 
     @abstractmethod
+    def listar_por_brigada(self, brigada_id: int) -> list[IntegranteBrigada]:
+        """Retorna las relaciones de integrantes asignados a la brigada indicada."""
+        pass
+
+    @abstractmethod
     def eliminar(
         self,
         relacion: IntegranteBrigada,

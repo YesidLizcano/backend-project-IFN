@@ -12,6 +12,11 @@ from src.Modules.Brigadas.Domain.integrante import IntegranteActualizar
 from src.Modules.Brigadas.Domain.integrante import IntegranteCrear, IntegranteSalida
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository import get_integrante_repository
+from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada
+from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
+from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteBrigadaRepository import (
+    get_integrante_brigada_repository,
+)
 from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
 from src.Modules.Ubicacion.Infrastructure.Persistence.DBMunicipioRepository import get_municipio_repository
 from src.Modules.Ubicacion.Domain.departamento_repository import DepartamentoRepository
@@ -89,19 +94,21 @@ async def listar_integrantes_por_region(
 
 @router.get(
     "/integrantes/brigada/{brigada_id}",
-    response_model=List[IntegranteSalida],
+    response_model=List[IntegranteBrigada],
     status_code=status.HTTP_200_OK,
 )
 async def listar_integrantes_por_brigada(
     brigada_id: int,
-    integrante_repo: IntegranteRepository = Depends(get_integrante_repository),
+    integrante_brigada_repo: IntegranteBrigadaRepository = Depends(
+        get_integrante_brigada_repository
+    ),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """
     Lista todos los integrantes asociados a una brigada específica.
     """
     try:
-        caso_uso = IntegranteListarPorBrigada(integrante_repo)
+        caso_uso = IntegranteListarPorBrigada(integrante_brigada_repo)
         return caso_uso.execute(brigada_id)
     except Exception as e:
         raise HTTPException(

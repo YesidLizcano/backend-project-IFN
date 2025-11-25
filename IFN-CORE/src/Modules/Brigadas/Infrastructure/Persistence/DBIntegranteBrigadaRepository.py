@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlmodel import Session, delete
+from sqlmodel import Session, delete, select
 from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada
 from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
@@ -43,6 +43,12 @@ class DBIntegranteBrigadaRepository(IntegranteBrigadaRepository):
             )
         )
         self.db.commit()
+
+    def listar_por_brigada(self, brigada_id: int) -> list[IntegranteBrigada]:
+        registros = self.db.exec(
+            select(IntegranteBrigadaDB).where(IntegranteBrigadaDB.id_brigada == brigada_id)
+        ).all()
+        return [IntegranteBrigada.model_validate(r) for r in registros]
         
 
 def get_integrante_brigada_repository(
