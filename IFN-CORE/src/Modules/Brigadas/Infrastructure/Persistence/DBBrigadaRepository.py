@@ -16,6 +16,12 @@ class DBBrigadaRepository(BrigadaRepository):
     def __init__(self, db: Session):
         self.db = db
 
+    def _to_brigada_salida(self, brigada_db: BrigadaDB) -> BrigadaSalida:
+        """Mapea la entidad de base de datos a DTO asegurando un campo 'integrantes' válido."""
+        data = brigada_db.model_dump()
+        data["integrantes"] = []
+        return BrigadaSalida.model_validate(data)
+
     def guardar(self, brigada: Brigada, *, commit: bool = True) -> BrigadaSalida:
         db_brigada = BrigadaDB(**brigada.model_dump())
         self.db.add(db_brigada)
@@ -23,17 +29,17 @@ class DBBrigadaRepository(BrigadaRepository):
         if commit:
             self.db.commit()
         self.db.refresh(db_brigada)
-        return BrigadaSalida.model_validate(db_brigada)
+        return self._to_brigada_salida(db_brigada)
     
     def buscar_por_id(self, brigada_id: int) -> BrigadaSalida | None:
         db_brigada = self.db.get(BrigadaDB, brigada_id)
-        return BrigadaSalida.model_validate(db_brigada) if db_brigada else None
+        return self._to_brigada_salida(db_brigada) if db_brigada else None
 
     def buscar_por_conglomerado_id(self, conglomerado_id: int) -> BrigadaSalida | None:
         db_brigada = self.db.exec(
             select(BrigadaDB).where(BrigadaDB.conglomerado_id == conglomerado_id)
         ).first()
-        return BrigadaSalida.model_validate(db_brigada) if db_brigada else None
+        return self._to_brigada_salida(db_brigada) if db_brigada else None
 
     def verificar_minimos(self, brigada_id: int) -> dict:
         """Valida que la brigada tenga los roles mínimos requeridos."""
@@ -101,12 +107,7 @@ class DBBrigadaRepository(BrigadaRepository):
 
         brigadas_salida = []
         for b_db in brigadas_db:
-            # Crear el DTO de salida a partir de los datos de la BD
-            # Usamos model_dump() para evitar conflicto de tipos en 'integrantes'
-            # y añadimos 'integrantes' vacío para pasar la validación inicial
-            data = b_db.model_dump()
-            data["integrantes"] = []
-            b_salida = BrigadaSalida.model_validate(data)
+            b_salida = self._to_brigada_salida(b_db)
 
             total_integrantes = len(b_db.integrantes)
 
