@@ -42,10 +42,17 @@ class DBMaterialEquipoRepository(MaterialEquipoRepository):
 
     # VALIDACIÓN CORRECTA DE CANTIDAD (sumar/restar)
         if "cantidad" in datos:
-            nueva_cantidad = db_material.cantidad + datos["cantidad"]
+            # Asegurar que el valor recibido se interprete como delta (int).
+            # Si el cliente envía un número negativo debe disminuir la cantidad.
+            try:
+                delta = int(datos["cantidad"])
+            except Exception:
+                raise ValueError("El campo 'cantidad' debe ser un número entero")
+
+            nueva_cantidad = db_material.cantidad + delta
             if nueva_cantidad < 0:
                 raise ValueError("La cantidad resultante no puede ser negativa")
-            
+
             datos["cantidad"] = nueva_cantidad
 
         for campo, valor in datos.items():
