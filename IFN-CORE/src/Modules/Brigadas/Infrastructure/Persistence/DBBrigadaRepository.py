@@ -96,31 +96,31 @@ class DBBrigadaRepository(BrigadaRepository):
 
         brigadas_salida = []
         for b_db in brigadas_db:
+            # Crear el DTO de salida a partir de los datos de la BD
             b_salida = BrigadaSalida.model_validate(b_db)
-            
+
             total_integrantes = len(b_db.integrantes)
-            
-            roles_resumen = {}
+
+            # Contar roles clave para el resumen
+            roles_counts = {"jefeBrigada": 0, "botanico": 0}
             for i in b_db.integrantes:
-                rol = i.rol
-                if rol in roles_resumen:
-                    roles_resumen[rol] += 1
-                else:
-                    roles_resumen[rol] = 1
-            
+                if i.rol in roles_counts:
+                    roles_counts[i.rol] += 1
+
+            # Construir la cadena de resumen
             resumen_partes = []
-            if "jefeBrigada" in roles_resumen:
+            if roles_counts["jefeBrigada"] > 0:
                 resumen_partes.append("Jefe")
-            
-            if "botanico" in roles_resumen:
-                count = roles_resumen["botanico"]
+            if roles_counts["botanico"] > 0:
+                count = roles_counts["botanico"]
                 resumen_partes.append(f"{count} Botánico{'s' if count > 1 else ''}")
 
             resumen_str = " | ".join(resumen_partes)
-            
+
+            # Asignar el resumen final al campo 'integrantes'
             b_salida.integrantes = f"Integrantes ({total_integrantes}) | {resumen_str}"
             brigadas_salida.append(b_salida)
-            
+
         return brigadas_salida
 
     
