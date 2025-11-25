@@ -39,6 +39,9 @@ class Brigada(BrigadaBase):
 class BrigadaSalida(Brigada):
     """DTO de salida con soporte para lista detallada o resumen de integrantes."""
     id: int
+    municipio: str | None = None
+    fechaInicio: date | None = None
+    fechaFinAprox: date | None = None
     integrantes: str | list[IntegranteSalida] = Field(default_factory=list)
 
     class Config:

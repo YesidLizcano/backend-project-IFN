@@ -8,6 +8,8 @@ from src.Modules.Brigadas.Domain.brigada import Brigada, BrigadaSalida
 from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
 from src.Modules.Brigadas.Infrastructure.Persistence.brigada_db import BrigadaDB
 from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
+from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import ConglomeradoDB
+from src.Modules.Ubicacion.Infrastructure.Persistence.municipio_db import MunicipioDB
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
 from src.Shared.database import get_session
 
@@ -20,7 +22,23 @@ class DBBrigadaRepository(BrigadaRepository):
         """Mapea la entidad de base de datos a DTO asegurando un campo 'integrantes' válido."""
         data = brigada_db.model_dump()
         data["integrantes"] = []
-        return BrigadaSalida.model_validate(data)
+        brigada_salida = BrigadaSalida.model_validate(data)
+
+        conglomerado = getattr(brigada_db, "conglomerado", None)
+        if conglomerado is None and brigada_db.conglomerado_id is not None:
+            conglomerado = self.db.get(ConglomeradoDB, brigada_db.conglomerado_id)
+
+        if conglomerado:
+            brigada_salida.fechaInicio = conglomerado.fechaInicio
+            brigada_salida.fechaFinAprox = conglomerado.fechaFinAprox
+
+            municipio = getattr(conglomerado, "municipio", None)
+            if municipio is None and conglomerado.municipio_id is not None:
+                municipio = self.db.get(MunicipioDB, conglomerado.municipio_id)
+            if municipio:
+                brigada_salida.municipio = municipio.nombre
+
+        return brigada_salida
 
     def guardar(self, brigada: Brigada, *, commit: bool = True) -> BrigadaSalida:
         db_brigada = BrigadaDB(**brigada.model_dump())
@@ -101,7 +119,8 @@ class DBBrigadaRepository(BrigadaRepository):
             list[BrigadaSalida]: Colección de brigadas con resumen de integrantes.
         """
         stmt = select(BrigadaDB).options(
-            selectinload(BrigadaDB.integrantes).selectinload(IntegranteBrigadaDB.integrante)
+            selectinload(BrigadaDB.integrantes).selectinload(IntegranteBrigadaDB.integrante),
+            selectinload(BrigadaDB.conglomerado).selectinload(ConglomeradoDB.municipio),
         )
         brigadas_db = self.db.exec(stmt).all()
 
