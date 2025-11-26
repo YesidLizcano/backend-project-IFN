@@ -43,7 +43,7 @@ class AsignarMaterialesPorDefectoABrigada:
 
     Usa las fechas del conglomerado asociado (fechaInicio, fechaFinAprox).
     Busca los materiales por nombre dentro del departamento del municipio del
-    conglomerado. Omite los que no existan y devuelve un resumen.
+    conglomerado. Omite los que no existan y devuelve un resumen de lo que se asignaría.
     """
 
     def __init__(
@@ -118,7 +118,8 @@ class AsignarMaterialesPorDefectoABrigada:
                 f"{no_encontrados} / sin disponibilidad: {sin_disponibilidad}"
             )
 
-        # Segunda pasada: crear asignaciones (permitiendo parcial si corresponde)
+        # Segunda pasada: simular asignaciones (permitiendo parcial si corresponde)
+        detalle_simulado = []
         for item in candidatos:
             material = item["material"]
             nombre = item["nombre"]
@@ -127,15 +128,14 @@ class AsignarMaterialesPorDefectoABrigada:
 
             asignar = cantidad if disponible >= cantidad else disponible
 
-            ce = ControlEquipoGuardar(
-                id_brigada=brigada_id,
-                id_material_equipo=material.id,
-                cantidad_asignada=asignar,
-                fecha_Inicio_Asignacion=conglomerado.fechaInicio,
-                fecha_Fin_Asignacion=conglomerado.fechaFinAprox,
-            )
-            creado = self.control_equipo_repo.guardar(ce)
-            creados.append(creado)
+            detalle_simulado.append({
+                "material_equipo_id": material.id,
+                "nombre": nombre,
+                "cantidad_solicitada": cantidad,
+                "cantidad_asignable": asignar,
+                "fecha_inicio": conglomerado.fechaInicio,
+                "fecha_fin": conglomerado.fechaFinAprox,
+            })
 
             if asignar < cantidad:
                 asignaciones_parciales.append(
@@ -149,16 +149,9 @@ class AsignarMaterialesPorDefectoABrigada:
 
         return {
             "brigada_id": brigada_id,
-            "asignaciones_creadas": len(creados),
+            "asignaciones_propuestas": len(detalle_simulado),
             "materiales_no_encontrados": no_encontrados,
             "sin_disponibilidad": sin_disponibilidad,
             "asignaciones_parciales": asignaciones_parciales,
-            "detalle": [
-                {
-                    "control_equipo_id": c.id,
-                    "material_equipo_id": c.id_material_equipo,
-                    "cantidad": c.cantidad_asignada,
-                }
-                for c in creados
-            ],
+            "detalle": detalle_simulado,
         }

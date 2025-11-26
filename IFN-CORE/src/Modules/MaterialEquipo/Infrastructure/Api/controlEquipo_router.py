@@ -61,11 +61,11 @@ async def obtener_control_equipo(
     return control_equipo
 
 
-@router.post(
+@router.get(
     "/brigadas/{brigada_id}/control-equipos/asignacion-defecto",
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
 )
-async def asignar_por_defecto(
+async def listar_asignacion_por_defecto(
     brigada_id: int,
     control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
     material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
@@ -74,10 +74,9 @@ async def asignar_por_defecto(
     municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
-    """Asigna cantidades por defecto de materiales/equipos a la brigada.
+    """Lista la propuesta de asignación por defecto de materiales/equipos.
 
-    Usa fechas del conglomerado (inicio y fin aprox) y el departamento del
-    municipio para localizar los materiales por nombre.
+    No guarda cambios. Solo simula qué se asignaría basado en fechas y disponibilidad.
     """
     try:
         caso_uso = AsignarMaterialesPorDefectoABrigada(
