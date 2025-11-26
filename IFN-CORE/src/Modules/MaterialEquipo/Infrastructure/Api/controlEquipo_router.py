@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from datetime import date
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 
 from src.Modules.MaterialEquipo.Application.controlEquipo_crear import CrearControlEquipo
 from src.Modules.MaterialEquipo.Application.controlEquipo_asignacion_defecto import AsignarMaterialesPorDefectoABrigada
@@ -62,31 +63,27 @@ async def obtener_control_equipo(
 
 
 @router.get(
-    "/brigadas/{brigada_id}/control-equipos/asignacion-defecto",
+    "/control-equipos/asignacion-defecto",
     status_code=status.HTTP_200_OK,
 )
 async def listar_asignacion_por_defecto(
-    brigada_id: int,
+    nombre_departamento: str,
+    fecha_inicio: date,
+    fecha_fin_aprox: date,
     control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
     material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
-    brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
-    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
-    municipio_repo: MunicipioRepository = Depends(get_municipio_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
     """Lista la propuesta de asignación por defecto de materiales/equipos.
 
-    No guarda cambios. Solo simula qué se asignaría basado en fechas y disponibilidad.
+    Simula qué se asignaría basado en fechas y disponibilidad en el departamento indicado (por nombre).
     """
     try:
         caso_uso = AsignarMaterialesPorDefectoABrigada(
             control_equipo_repo,
             material_equipo_repo,
-            brigada_repo,
-            conglomerado_repo,
-            municipio_repo,
         )
-        resumen = caso_uso.execute(brigada_id)
+        resumen = caso_uso.execute(nombre_departamento, fecha_inicio, fecha_fin_aprox)
         return resumen
     except ValueError as e:
         msg = str(e)

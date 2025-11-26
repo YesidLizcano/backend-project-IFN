@@ -39,45 +39,21 @@ DEFAULT_ITEMS: List[Tuple[str, int]] = [
 
 
 class AsignarMaterialesPorDefectoABrigada:
-    """Asigna un set por defecto de materiales/equipos a una brigada.
+    """Simula la asignación por defecto de materiales/equipos.
 
-    Usa las fechas del conglomerado asociado (fechaInicio, fechaFinAprox).
-    Busca los materiales por nombre dentro del departamento del municipio del
-    conglomerado. Omite los que no existan y devuelve un resumen de lo que se asignaría.
+    Usa fechas y departamento provistos para calcular disponibilidad.
+    Busca los materiales por nombre dentro del departamento.
     """
 
     def __init__(
         self,
         control_equipo_repo: ControlEquipoRepository,
         material_equipo_repo: MaterialEquipoRepository,
-        brigada_repo: BrigadaRepository,
-        conglomerado_repo: ConglomeradoRepository,
-        municipio_repo: MunicipioRepository,
     ) -> None:
         self.control_equipo_repo = control_equipo_repo
         self.material_equipo_repo = material_equipo_repo
-        self.brigada_repo = brigada_repo
-        self.conglomerado_repo = conglomerado_repo
-        self.municipio_repo = municipio_repo
 
-    def execute(self, brigada_id: int) -> Dict:
-        brigada = self.brigada_repo.buscar_por_id(brigada_id)
-        if brigada is None:
-            raise ValueError("Brigada no encontrada")
-
-        conglomerado = self.conglomerado_repo.buscar_por_id(brigada.conglomerado_id)
-        if conglomerado is None:
-            raise ValueError("Conglomerado asociado no encontrado")
-
-        if not conglomerado.fechaInicio or not conglomerado.fechaFinAprox:
-            raise ValueError("El conglomerado no tiene fechas definidas")
-
-        municipio = self.municipio_repo.buscar_por_id(conglomerado.municipio_id)
-        if municipio is None:
-            raise ValueError("Municipio asociado no encontrado")
-
-        depto_id = municipio.departamento_id
-
+    def execute(self, nombre_departamento: str, fecha_inicio: date, fecha_fin_aprox: date) -> Dict:
         creados: List[ControlEquipo] = []
         no_encontrados: List[str] = []
         sin_disponibilidad: List[str] = []
@@ -86,17 +62,17 @@ class AsignarMaterialesPorDefectoABrigada:
         # Primera pasada: validar TODOS los ítems (existencia y disponibilidad)
         candidatos: List[Dict] = []
         for nombre, cantidad in DEFAULT_ITEMS:
-            material = self.material_equipo_repo.buscar_por_nombre_y_departamento(
-                nombre=nombre, departamento_id=depto_id
+            material = self.material_equipo_repo.buscar_por_nombre_y_nombre_departamento(
+                nombre=nombre, nombre_departamento=nombre_departamento
             )
             if material is None:
                 no_encontrados.append(nombre)
                 continue
 
-            disponible = self.control_equipo_repo.calcular_disponibilidad(
+            disponible = self.control_equipo_repo.calcular_disponibilidad_por_nombre_departamento(
                 nombre_equipo=nombre,
-                brigada_id=brigada_id,
-                fecha_inicio=conglomerado.fechaInicio,
+                nombre_departamento=nombre_departamento,
+                fecha_inicio=fecha_inicio,
             )
             if disponible <= 0:
                 sin_disponibilidad.append(nombre)
@@ -109,13 +85,6 @@ class AsignarMaterialesPorDefectoABrigada:
                     "solicitado": cantidad,
                     "disponible": disponible,
                 }
-            )
-
-        # Si hay problemas, no crear nada y reportar
-        if no_encontrados or sin_disponibilidad:
-            raise ValueError(
-                "No se puede asignar por defecto: materiales no encontrados: "
-                f"{no_encontrados} / sin disponibilidad: {sin_disponibilidad}"
             )
 
         # Segunda pasada: simular asignaciones (permitiendo parcial si corresponde)
@@ -133,8 +102,8 @@ class AsignarMaterialesPorDefectoABrigada:
                 "nombre": nombre,
                 "cantidad_solicitada": cantidad,
                 "cantidad_asignable": asignar,
-                "fecha_inicio": conglomerado.fechaInicio,
-                "fecha_fin": conglomerado.fechaFinAprox,
+                "fecha_inicio": fecha_inicio,
+                "fecha_fin": fecha_fin_aprox,
             })
 
             if asignar < cantidad:
@@ -148,7 +117,7 @@ class AsignarMaterialesPorDefectoABrigada:
                 )
 
         return {
-            "brigada_id": brigada_id,
+            "nombre_departamento": nombre_departamento,
             "asignaciones_propuestas": len(detalle_simulado),
             "materiales_no_encontrados": no_encontrados,
             "sin_disponibilidad": sin_disponibilidad,
