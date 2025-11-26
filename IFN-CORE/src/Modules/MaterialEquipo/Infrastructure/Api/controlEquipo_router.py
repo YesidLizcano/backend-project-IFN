@@ -44,25 +44,6 @@ async def crear_control_equipo(
 
 
 @router.get(
-    "/control-equipos/{control_equipo_id}",
-    response_model=ControlEquipo,
-    status_code=status.HTTP_200_OK,
-)
-async def obtener_control_equipo(
-    control_equipo_id: int,
-    control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
-    token_payload: TokenPayload = Depends(get_token_payload),
-):
-    control_equipo = control_equipo_repo.buscar_por_id(control_equipo_id)
-    if not control_equipo:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Control de equipo con ID {control_equipo_id} no encontrado"
-        )
-    return control_equipo
-
-
-@router.get(
     "/control-equipos/asignacion-defecto",
     status_code=status.HTTP_200_OK,
 )
@@ -90,3 +71,22 @@ async def listar_asignacion_por_defecto(
         if "fechas" in msg.lower() or "no se puede asignar por defecto" in msg.lower():
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=msg)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
+
+
+@router.get(
+    "/control-equipos/{control_equipo_id}",
+    response_model=ControlEquipo,
+    status_code=status.HTTP_200_OK,
+)
+async def obtener_control_equipo(
+    control_equipo_id: int,
+    control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
+):
+    control_equipo = control_equipo_repo.buscar_por_id(control_equipo_id)
+    if not control_equipo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Control de equipo con ID {control_equipo_id} no encontrado"
+        )
+    return control_equipo
