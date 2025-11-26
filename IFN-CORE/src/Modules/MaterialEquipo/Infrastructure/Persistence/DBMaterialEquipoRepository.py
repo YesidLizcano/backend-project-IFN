@@ -87,13 +87,14 @@ class DBMaterialEquipoRepository(MaterialEquipoRepository):
             self.db.rollback()
             raise
 
-    def buscar_por_nombre_y_departamento(
-        self, nombre: str, departamento_id: int
+    def buscar_por_nombre_y_nombre_departamento(
+        self, nombre: str, nombre_departamento: str
     ) -> MaterialEquipoSalida | None:
         stmt = (
             select(MaterialEquipoDB)
+            .join(DepartamentoDB, MaterialEquipoDB.departamento_id == DepartamentoDB.id)
             .where(MaterialEquipoDB.nombre == nombre)
-            .where(MaterialEquipoDB.departamento_id == departamento_id)
+            .where(DepartamentoDB.nombre == nombre_departamento)
         )
         db_item = self.db.exec(stmt).first()
         return MaterialEquipoSalida.model_validate(db_item) if db_item else None
