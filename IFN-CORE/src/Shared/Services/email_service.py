@@ -8,15 +8,20 @@ class EmailService:
         # Configuración para usar con Contraseña de Aplicación (ej. Gmail)
         # Asegúrese de establecer las variables de entorno MAIL_USERNAME y MAIL_PASSWORD
         mail_username = os.getenv("MAIL_USERNAME", "user@example.com")
+        mail_port = int(os.getenv("MAIL_PORT", 587))
         
+        # Ajuste automático de SSL/TLS según el puerto
+        use_ssl = mail_port == 465
+        use_tls = mail_port == 587
+
         self.conf = ConnectionConfig(
             MAIL_USERNAME = mail_username,
             MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "password"),
             MAIL_FROM = os.getenv("MAIL_FROM", mail_username), # Fallback al usuario si no se define remitente
-            MAIL_PORT = int(os.getenv("MAIL_PORT", 587)),
+            MAIL_PORT = mail_port,
             MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com"),
-            MAIL_STARTTLS = True,
-            MAIL_SSL_TLS = False,
+            MAIL_STARTTLS = use_tls,
+            MAIL_SSL_TLS = use_ssl,
             USE_CREDENTIALS = True,
             VALIDATE_CERTS = True
         )
