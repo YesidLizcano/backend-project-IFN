@@ -2,7 +2,6 @@ from datetime import date
 from fastapi import APIRouter, Depends, status, HTTPException, Query
 
 from src.Modules.MaterialEquipo.Application.controlEquipo_crear import CrearControlEquipo
-from src.Modules.MaterialEquipo.Application.controlEquipo_asignacion_defecto import AsignarMaterialesPorDefectoABrigada
 from src.Modules.MaterialEquipo.Domain.controlEquipo import ControlEquipo, ControlEquipoCrear
 from src.Modules.MaterialEquipo.Domain.controlEquipo_repository import ControlEquipoRepository
 from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
@@ -43,34 +42,6 @@ async def crear_control_equipo(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
-@router.get(
-    "/control-equipos/asignacion-defecto",
-    status_code=status.HTTP_200_OK,
-)
-async def listar_asignacion_por_defecto(
-    nombre_departamento: str,
-    fecha_inicio: date,
-    fecha_fin_aprox: date,
-    control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
-    material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
-    token_payload: TokenPayload = Depends(get_token_payload),
-):
-    """Lista la propuesta de asignación por defecto de materiales/equipos.
-
-    Simula qué se asignaría basado en fechas y disponibilidad en el departamento indicado (por nombre).
-    """
-    try:
-        caso_uso = AsignarMaterialesPorDefectoABrigada(
-            control_equipo_repo,
-            material_equipo_repo,
-        )
-        resumen = caso_uso.execute(nombre_departamento, fecha_inicio, fecha_fin_aprox)
-        return resumen
-    except ValueError as e:
-        msg = str(e)
-        if "fechas" in msg.lower() or "no se puede asignar por defecto" in msg.lower():
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=msg)
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
 
 
 @router.get(
