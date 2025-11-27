@@ -112,10 +112,32 @@ class AsignarMaterialesPorDefectoABrigada:
             else:
                 asignacion_completa.append(detalle_item)
 
+        # Tercera parte: Buscar materiales NO obligatorios (extras)
+        otros_materiales = []
+        todos_los_materiales = self.material_equipo_repo.listar_materiales_equipo(nombre_departamento)
+        nombres_obligatorios = {item[0] for item in DEFAULT_ITEMS}
+
+        for material in todos_los_materiales:
+            if material.nombre not in nombres_obligatorios:
+                disponible = self.control_equipo_repo.calcular_disponibilidad_por_nombre_departamento(
+                    nombre_equipo=material.nombre,
+                    nombre_departamento=nombre_departamento,
+                    fecha_inicio=fecha_inicio,
+                )
+                otros_materiales.append({
+                    "material_equipo_id": material.id,
+                    "nombre": material.nombre,
+                    "cantidad_total": material.cantidad,
+                    "cantidad_disponible": disponible,
+                    "fecha_inicio": fecha_inicio,
+                    "fecha_fin": fecha_fin_aprox,
+                })
+
         return {
             "nombre_departamento": nombre_departamento,
             "asignacion_completa": asignacion_completa,
             "asignacion_incompleta": asignacion_incompleta,
+            "otros_materiales": otros_materiales,
             "materiales_no_encontrados": no_encontrados,
             "sin_disponibilidad": sin_disponibilidad,
         }
