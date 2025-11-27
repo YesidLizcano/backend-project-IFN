@@ -54,10 +54,8 @@ class AsignarMaterialesPorDefectoABrigada:
         self.material_equipo_repo = material_equipo_repo
 
     def execute(self, nombre_departamento: str, fecha_inicio: date, fecha_fin_aprox: date) -> Dict:
-        creados: List[ControlEquipo] = []
         no_encontrados: List[str] = []
         sin_disponibilidad: List[str] = []
-        asignaciones_parciales: List[Dict] = []
 
         # Primera pasada: validar TODOS los ítems (existencia y disponibilidad)
         candidatos: List[Dict] = []
@@ -87,8 +85,10 @@ class AsignarMaterialesPorDefectoABrigada:
                 }
             )
 
-        # Segunda pasada: simular asignaciones (permitiendo parcial si corresponde)
-        detalle_simulado = []
+        # Segunda pasada: clasificar en completa e incompleta
+        asignacion_completa = []
+        asignacion_incompleta = []
+
         for item in candidatos:
             material = item["material"]
             nombre = item["nombre"]
@@ -97,30 +97,25 @@ class AsignarMaterialesPorDefectoABrigada:
 
             asignar = cantidad if disponible >= cantidad else disponible
 
-            detalle_simulado.append({
+            detalle_item = {
                 "material_equipo_id": material.id,
                 "nombre": nombre,
                 "cantidad_solicitada": cantidad,
                 "cantidad_asignable": asignar,
                 "fecha_inicio": fecha_inicio,
                 "fecha_fin": fecha_fin_aprox,
-            })
+            }
 
             if asignar < cantidad:
-                asignaciones_parciales.append(
-                    {
-                        "nombre": nombre,
-                        "solicitado": cantidad,
-                        "asignado": asignar,
-                        "faltante": cantidad - asignar,
-                    }
-                )
+                detalle_item["faltante"] = cantidad - asignar
+                asignacion_incompleta.append(detalle_item)
+            else:
+                asignacion_completa.append(detalle_item)
 
         return {
             "nombre_departamento": nombre_departamento,
-            "asignaciones_propuestas": len(detalle_simulado),
+            "asignacion_completa": asignacion_completa,
+            "asignacion_incompleta": asignacion_incompleta,
             "materiales_no_encontrados": no_encontrados,
             "sin_disponibilidad": sin_disponibilidad,
-            "asignaciones_parciales": asignaciones_parciales,
-            "detalle": detalle_simulado,
         }
