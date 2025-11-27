@@ -87,6 +87,21 @@ class DBMaterialEquipoRepository(MaterialEquipoRepository):
             self.db.rollback()
             raise
 
+    def buscar_por_nombre_y_departamento(
+        self, nombre: str, departamento_id: int
+    ) -> MaterialEquipoSalida | None:
+        """Buscar un material/equipo por su nombre y departamento (ID).
+        
+        Mantenido por compatibilidad con casos de uso que aún usan ID.
+        """
+        stmt = (
+            select(MaterialEquipoDB)
+            .where(MaterialEquipoDB.nombre == nombre)
+            .where(MaterialEquipoDB.departamento_id == departamento_id)
+        )
+        db_item = self.db.exec(stmt).first()
+        return MaterialEquipoSalida.model_validate(db_item) if db_item else None
+
     def buscar_por_nombre_y_nombre_departamento(
         self, nombre: str, nombre_departamento: str
     ) -> MaterialEquipoSalida | None:

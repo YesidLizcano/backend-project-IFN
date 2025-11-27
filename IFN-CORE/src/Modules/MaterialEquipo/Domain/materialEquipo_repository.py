@@ -33,7 +33,14 @@ class MaterialEquipoRepository(ABC):
     def buscar_por_nombre_y_departamento(
         self, nombre: str, departamento_id: int
     ) -> MaterialEquipoSalida | None:
-        """Buscar un material/equipo por su nombre y departamento."""
+        """Buscar un material/equipo por su nombre y departamento (ID)."""
+        pass
+
+    @abstractmethod
+    def buscar_por_nombre_y_nombre_departamento(
+        self, nombre: str, nombre_departamento: str
+    ) -> MaterialEquipoSalida | None:
+        """Buscar un material/equipo por su nombre y nombre de departamento."""
         pass
 
     @abstractmethod
