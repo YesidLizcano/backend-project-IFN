@@ -34,6 +34,15 @@ class ConglomeradoRepository(ABC):
         pass
 
     @abstractmethod
+    def finalizar(
+        self,
+        conglomerado_id: int,
+        fecha_fin: date,
+    ) -> ConglomeradoSalida:
+        """Establece la fechaFin de un conglomerado, liberando a sus integrantes."""
+        pass
+
+    @abstractmethod
     def eliminar(self, conglomerado_id: int) -> None:
         """Eliminar un conglomerado existente por su identificador."""
         pass

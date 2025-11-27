@@ -1,6 +1,6 @@
 from fastapi import Depends
 from sqlmodel import Session, select, delete
-from sqlalchemy import update
+from sqlalchemy import update, func
 from typing import List
 from datetime import date
 from sqlalchemy import exists, and_
@@ -39,10 +39,11 @@ class DBIntegranteRepository(IntegranteRepository):
         fecha_fin_aprox: date,
         excluir_brigada_id: int | None = None,
     ):
+        fecha_fin_real = func.coalesce(ConglomeradoDB.fechaFin, ConglomeradoDB.fechaFinAprox)
         condiciones = [
             IntegranteBrigadaDB.id_integrante == integrante_id,
             ConglomeradoDB.fechaInicio <= fecha_fin_aprox,
-            ConglomeradoDB.fechaFinAprox >= fecha_inicio,
+            fecha_fin_real >= fecha_inicio,
             IntegranteBrigadaDB.id_brigada == BrigadaDB.id,
             BrigadaDB.conglomerado_id == ConglomeradoDB.id,
         ]

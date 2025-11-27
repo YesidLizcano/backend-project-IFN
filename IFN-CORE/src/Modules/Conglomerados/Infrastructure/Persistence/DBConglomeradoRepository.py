@@ -113,6 +113,27 @@ class DBConglomeradoRepository(ConglomeradoRepository):
         
         return ConglomeradoSalida.model_validate(db_conglomerado)
 
+    def finalizar(
+        self,
+        conglomerado_id: int,
+        fecha_fin: date,
+    ) -> ConglomeradoSalida:
+        db_conglomerado = self.db.get(ConglomeradoDB, conglomerado_id)
+        if not db_conglomerado:
+            raise ValueError(f"Conglomerado con ID {conglomerado_id} no encontrado")
+        
+        db_conglomerado.fechaFin = fecha_fin
+        
+        try:
+            self.db.add(db_conglomerado)
+            self.db.commit()
+            self.db.refresh(db_conglomerado)
+        except Exception as e:
+            self.db.rollback()
+            raise e
+            
+        return ConglomeradoSalida.model_validate(db_conglomerado)
+
     def eliminar(self, conglomerado_id: int) -> None:
         """Elimina el conglomerado siempre que no exista una brigada asociada."""
         db_conglomerado = self.db.get(ConglomeradoDB, conglomerado_id)

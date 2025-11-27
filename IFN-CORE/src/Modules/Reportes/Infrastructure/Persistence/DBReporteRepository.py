@@ -6,7 +6,10 @@ from src.Modules.MaterialEquipo.Infrastructure.Persistence.materialEquipo_db imp
 from src.Modules.MaterialEquipo.Infrastructure.Persistence.controlEquipo_db import ControlEquipoDB
 from src.Modules.Ubicacion.Infrastructure.Persistence.departamento_db import DepartamentoDB
 from src.Modules.Brigadas.Infrastructure.Persistence.brigada_db import BrigadaDB
+from src.Modules.Brigadas.Infrastructure.Persistence.integrante_db import IntegranteDB
+from src.Modules.Brigadas.Infrastructure.Persistence.integranteBrigada_db import IntegranteBrigadaDB
 from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import ConglomeradoDB
+from src.Modules.Conglomerados.Infrastructure.Persistence.subparcela_db import SubparcelaDB
 from src.Shared.database import get_session
 from fastapi import Depends
 
@@ -99,6 +102,106 @@ class DBReporteRepository(ReporteRepository):
             }
             for conglomerado, municipio in resultados
         ]
+
+    def generar_reporte_estadisticas(self) -> Dict[str, int]:
+        total_conglomerados = self.session.exec(select(func.count(ConglomeradoDB.id))).one()
+        
+        total_integrantes_activos = self.session.exec(
+            select(func.count(IntegranteDB.id)).where(IntegranteDB.estado == "ACTIVO_DISPONIBLE")
+        ).one()
+        
+        total_brigadas_activas = self.session.exec(
+            select(func.count(BrigadaDB.id)).where(BrigadaDB.estado == "ACTIVA")
+        ).one()
+        
+        return {
+            "total_conglomerados": total_conglomerados,
+            "total_integrantes_activos_disponibles": total_integrantes_activos,
+            "total_brigadas_activas": total_brigadas_activas
+        }
+
+    def generar_reporte_investigacion(self, conglomerado_id: int) -> Dict[str, Any]:
+        # 1. Obtener Conglomerado y Municipio
+        conglomerado_query = (
+            select(ConglomeradoDB, MunicipioDB)
+            .join(MunicipioDB, ConglomeradoDB.municipio_id == MunicipioDB.id)
+            .where(ConglomeradoDB.id == conglomerado_id)
+        )
+        conglomerado_res = self.session.exec(conglomerado_query).first()
+        
+        if not conglomerado_res:
+            return None
+
+        conglomerado, municipio = conglomerado_res
+        
+        # 2. Obtener Subparcelas
+        subparcelas = self.session.exec(
+            select(SubparcelaDB).where(SubparcelaDB.conglomerado_id == conglomerado_id)
+        ).all()
+
+        # 3. Obtener Brigada
+        brigada = self.session.exec(
+            select(BrigadaDB).where(BrigadaDB.conglomerado_id == conglomerado_id)
+        ).first()
+
+        integrantes_data = []
+        materiales_data = []
+        brigada_data = None
+
+        if brigada:
+            brigada_data = {
+                "fecha_creacion": brigada.fechaCreacion,
+                "estado": brigada.estado
+            }
+
+            # 4. Obtener Integrantes
+            integrantes_query = (
+                select(IntegranteDB, IntegranteBrigadaDB.rol)
+                .join(IntegranteBrigadaDB, IntegranteDB.id == IntegranteBrigadaDB.id_integrante)
+                .where(IntegranteBrigadaDB.id_brigada == brigada.id)
+            )
+            integrantes = self.session.exec(integrantes_query).all()
+            integrantes_data = [
+                {
+                    "nombre": i.nombreCompleto,
+                    "rol": rol,
+                    "telefono": i.telefono,
+                    "email": i.email
+                }
+                for i, rol in integrantes
+            ]
+
+            # 5. Obtener Materiales y Equipos
+            materiales_query = (
+                select(MaterialEquipoDB, ControlEquipoDB.cantidad_asignada)
+                .join(ControlEquipoDB, MaterialEquipoDB.id == ControlEquipoDB.id_material_equipo)
+                .where(ControlEquipoDB.id_brigada == brigada.id)
+            )
+            materiales = self.session.exec(materiales_query).all()
+            materiales_data = [
+                {
+                    "nombre": m.nombre,
+                    "cantidad_asignada": cantidad
+                }
+                for m, cantidad in materiales
+            ]
+
+        return {
+            "conglomerado": {
+                "municipio": municipio.nombre,
+                "fecha_inicio": conglomerado.fechaInicio,
+                "fecha_fin_aprox": conglomerado.fechaFinAprox,
+                "fecha_fin": conglomerado.fechaFin,
+                "latitud": conglomerado.latitud,
+                "longitud": conglomerado.longitud
+            },
+            "subparcelas": [
+                {"descripcion": s.descripcion} for s in subparcelas
+            ],
+            "brigada": brigada_data,
+            "integrantes": integrantes_data,
+            "materiales_equipos": materiales_data
+        }
 
 def get_reporte_repository(session: Session = Depends(get_session)) -> ReporteRepository:
     return DBReporteRepository(session)

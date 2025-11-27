@@ -13,6 +13,7 @@ from src.Modules.Conglomerados.Domain.conglomerado import (
     Conglomerado, 
     ConglomeradoCrear, 
     ConglomeradoActualizarFechas,
+    ConglomeradoFinalizar,
     ConglomeradoSalida,
     PuntoCoords,
     VerificarPuntosRequest,
@@ -30,6 +31,7 @@ from src.Modules.Conglomerados.Application.conglomerado_crear import CrearConglo
 from src.Modules.Ubicacion.Application.departamento_listar_por_region import DepartamentoListarPorRegion
 from src.Modules.Ubicacion.Infrastructure.Persistence.DBDepartamentoRepository import get_departamento_repository
 from src.Modules.Conglomerados.Application.conglomerado_actualizar_fechas import ActualizarFechasConglomerado
+from src.Modules.Conglomerados.Application.conglomerado_finalizar import FinalizarConglomerado
 from src.Modules.Conglomerados.Application.conglomerado_eliminar import EliminarConglomerado
 from src.Modules.Ubicacion.Domain.municipio_repository import MunicipioRepository
 from src.Modules.Ubicacion.Domain.municipio import MunicipioCrear, Municipio
@@ -266,6 +268,30 @@ async def actualizar_fechas_conglomerado(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail=f"Error al actualizar fechas: {str(e)}"
         )
+
+
+@router.patch(
+    "/conglomerados/{conglomerado_id}/finalizar",
+    response_model=ConglomeradoSalida,
+    status_code=status.HTTP_200_OK,
+)
+async def finalizar_conglomerado(
+    conglomerado_id: int,
+    datos: ConglomeradoFinalizar,
+    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
+    token_payload: TokenPayload = Depends(get_token_payload),
+):
+    """
+    Finaliza un conglomerado estableciendo su fechaFin real.
+    Esto libera automáticamente a los integrantes asignados para fechas posteriores.
+    """
+    try:
+        finalizador = FinalizarConglomerado(conglomerado_repo)
+        return finalizador.execute(conglomerado_id, datos)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.delete(

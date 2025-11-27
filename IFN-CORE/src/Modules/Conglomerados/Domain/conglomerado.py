@@ -29,6 +29,12 @@ class ConglomeradoActualizarFechas(BaseModel):
     fechaInicio: date
     fechaFinAprox: date
 
+class ConglomeradoFinalizar(BaseModel):
+    """
+    DTO para finalizar un conglomerado estableciendo su fechaFin real.
+    """
+    fechaFin: date
+
 # --- 3. ENTIDAD DE DOMINIO ---
 class Conglomerado(ConglomeradoBase):
     """
