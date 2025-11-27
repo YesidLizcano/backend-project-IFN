@@ -7,3 +7,5 @@ geopy==2.4.1
 geopandas==1.1.1
 httpx==0.27.0
 alembic==1.17.2
+reportlab
+fastapi-mail
