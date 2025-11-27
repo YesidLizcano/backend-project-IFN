@@ -6,7 +6,7 @@ from src.Modules.MaterialEquipo.Domain.controlEquipo import ControlEquipo, Contr
 
 class ControlEquipoRepository(ABC):
     @abstractmethod
-    def guardar(self, control_equipo: ControlEquipoGuardar) -> ControlEquipo:
+    def guardar(self, control_equipo: ControlEquipoGuardar, commit: bool = True) -> ControlEquipo:
         """Persist a controlEquipo and return the saved domain entity."""
         pass
     

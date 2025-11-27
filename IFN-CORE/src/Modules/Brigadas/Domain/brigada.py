@@ -10,6 +10,12 @@ class AsignacionIntegrante(BaseModel):
     rol_asignado: str
 
 
+class AsignacionMaterial(BaseModel):
+    """Representa la asignación de un material/equipo a una brigada."""
+    material_equipo_id: int
+    cantidad_solicitada: int
+
+
 # --- 1. MODELO BASE (Componentes Comunes) ---
 class BrigadaBase(BaseModel):
     """Contiene los campos comunes que el usuario provee."""
@@ -26,6 +32,7 @@ class BrigadaCrear(BrigadaBase):
     fechaInicio: date
     fechaFinAprox: date
     integrantes_asignados: list[AsignacionIntegrante] = Field(default_factory=list)
+    asignacion_completa: list[AsignacionMaterial] = Field(default_factory=list)
 
 # --- 3. ENTIDAD DE DOMINIO ---
 class Brigada(BrigadaBase):

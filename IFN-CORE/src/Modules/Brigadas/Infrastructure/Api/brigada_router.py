@@ -12,6 +12,10 @@ from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteRepository impo
 from src.Modules.Brigadas.Infrastructure.Persistence.DBIntegranteBrigadaRepository import get_integrante_brigada_repository
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
 from src.Modules.Conglomerados.Infrastructure.Persistence.DBConglomeradoRepository import get_conglomerado_repository
+from src.Modules.MaterialEquipo.Domain.controlEquipo_repository import ControlEquipoRepository
+from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
+from src.Modules.MaterialEquipo.Infrastructure.Persistence.DBControlEquipoRepository import get_control_equipo_repository
+from src.Modules.MaterialEquipo.Infrastructure.Persistence.DBMaterialEquipoRepository import get_material_equipo_repository
 from src.Shared.Auth.Domain.auth_service_interface import TokenPayload
 from src.Shared.Auth.Infrastructure.dependencies import get_token_payload
 from src.Shared.database import SessionDep
@@ -35,12 +39,16 @@ async def crear_brigada(
     conglomerado_repo: ConglomeradoRepository = get_conglomerado_repository(session=session)
     integrante_repo: IntegranteRepository = get_integrante_repository(session=session)
     integrante_brigada_repo: IntegranteBrigadaRepository = get_integrante_brigada_repository(session=session)
+    control_equipo_repo: ControlEquipoRepository = get_control_equipo_repository(session=session)
+    material_equipo_repo: MaterialEquipoRepository = get_material_equipo_repository(session=session)
     try:
         creator = CrearBrigada(
             brigada_repository=brigada_repo,
             conglomerado_repository=conglomerado_repo,
             integrante_repository=integrante_repo,
             integrante_brigada_repository=integrante_brigada_repo,
+            control_equipo_repository=control_equipo_repo,
+            material_equipo_repository=material_equipo_repo,
             session=session,
         )
         saved_brigada = creator.execute(brigada_data, conglomerado_id)

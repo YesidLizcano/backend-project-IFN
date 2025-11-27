@@ -1,11 +1,14 @@
 from sqlmodel import Session
 
-from src.Modules.Brigadas.Domain.brigada import AsignacionIntegrante, Brigada, BrigadaCrear, BrigadaSalida
+from src.Modules.Brigadas.Domain.brigada import AsignacionIntegrante, AsignacionMaterial, Brigada, BrigadaCrear, BrigadaSalida
 from src.Modules.Brigadas.Domain.brigada_repository import BrigadaRepository
 from src.Modules.Brigadas.Domain.integranteBrigada import IntegranteBrigada
 from src.Modules.Brigadas.Domain.integranteBrigada_repository import IntegranteBrigadaRepository
 from src.Modules.Brigadas.Domain.integrante_repository import IntegranteRepository
 from src.Modules.Conglomerados.Domain.conglomerado_repository import ConglomeradoRepository
+from src.Modules.MaterialEquipo.Domain.controlEquipo_repository import ControlEquipoRepository
+from src.Modules.MaterialEquipo.Domain.materialEquipo_repository import MaterialEquipoRepository
+from src.Modules.MaterialEquipo.Domain.controlEquipo import ControlEquipoGuardar
 
 
 class CrearBrigada:
@@ -15,12 +18,16 @@ class CrearBrigada:
         conglomerado_repository: ConglomeradoRepository,
         integrante_repository: IntegranteRepository,
         integrante_brigada_repository: IntegranteBrigadaRepository,
+        control_equipo_repository: ControlEquipoRepository,
+        material_equipo_repository: MaterialEquipoRepository,
         session: Session,
     ):
         self.brigada_repository = brigada_repository
         self.conglomerado_repository = conglomerado_repository
         self.integrante_repository = integrante_repository
         self.integrante_brigada_repository = integrante_brigada_repository
+        self.control_equipo_repository = control_equipo_repository
+        self.material_equipo_repository = material_equipo_repository
         self.session = session
 
 
@@ -45,7 +52,7 @@ class CrearBrigada:
             )
 
             brigada_data = brigada.model_dump(
-                exclude={"integrantes_asignados", "fechaInicio", "fechaFinAprox"}
+                exclude={"integrantes_asignados", "asignacion_completa", "fechaInicio", "fechaFinAprox"}
             )
             brigada_entidad = Brigada(
                 **brigada_data,
@@ -62,6 +69,9 @@ class CrearBrigada:
                     rol=asignacion.rol_asignado,
                 )
                 self.integrante_brigada_repository.guardar(relacion, commit=False)
+
+            for material_asignado in brigada.asignacion_completa:
+                self._asignar_material(brigada_creada.id, material_asignado, str(brigada.fechaInicio))
 
             transaction.commit()
         except Exception:
@@ -86,3 +96,30 @@ class CrearBrigada:
     def _validar_integrante(self, integrante_id: int) -> None:
         if not self.integrante_repository.buscar_por_id(integrante_id):
             raise ValueError(f"Integrante con ID {integrante_id} no encontrado")
+
+    def _asignar_material(self, brigada_id: int, asignacion: AsignacionMaterial, fecha_inicio: str) -> None:
+        if asignacion.cantidad_solicitada <= 0:
+            raise ValueError("La cantidad solicitada debe ser mayor a 0")
+
+        material = self.material_equipo_repository.buscar_por_id(asignacion.material_equipo_id)
+        if not material:
+            raise ValueError(f"Material/Equipo con ID {asignacion.material_equipo_id} no encontrado")
+
+        disponibilidad = self.control_equipo_repository.calcular_disponibilidad(
+            nombre_equipo=material.nombre,
+            brigada_id=brigada_id,
+            fecha_inicio=fecha_inicio
+        )
+
+        if disponibilidad < asignacion.cantidad_solicitada:
+            raise ValueError(
+                f"No hay suficiente disponibilidad para '{material.nombre}'. Disponible: {disponibilidad}, Solicitado: {asignacion.cantidad_solicitada}"
+            )
+
+        control_equipo = ControlEquipoGuardar(
+            id_brigada=brigada_id,
+            id_material_equipo=asignacion.material_equipo_id,
+            cantidad_asignada=asignacion.cantidad_solicitada,
+        )
+        
+        self.control_equipo_repository.guardar(control_equipo, commit=False)

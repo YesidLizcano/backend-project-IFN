@@ -16,11 +16,15 @@ class DBControlEquipoRepository(ControlEquipoRepository):
     def __init__(self, db: Session):
         self.db = db
 
-    def guardar(self, control_equipo: ControlEquipoGuardar) -> ControlEquipo:
+    def guardar(self, control_equipo: ControlEquipoGuardar, commit: bool = True) -> ControlEquipo:
         db_control_equipo = ControlEquipoDB(**control_equipo.model_dump())
         self.db.add(db_control_equipo)
-        self.db.commit()
-        self.db.refresh(db_control_equipo)
+        if commit:
+            self.db.commit()
+            self.db.refresh(db_control_equipo)
+        else:
+            self.db.flush()
+            self.db.refresh(db_control_equipo)
         return ControlEquipo.model_validate(db_control_equipo)
     
     def buscar_por_id(self, control_equipo_id: int) -> ControlEquipo | None:
