@@ -10,6 +10,8 @@ from src.Modules.Conglomerados.Infrastructure.Persistence.conglomerado_db import
 from src.Shared.database import get_session
 from fastapi import Depends
 
+from src.Modules.Ubicacion.Infrastructure.Persistence.municipio_db import MunicipioDB
+
 class DBReporteRepository(ReporteRepository):
     def __init__(self, session: Session):
         self.session = session
@@ -55,6 +57,47 @@ class DBReporteRepository(ReporteRepository):
                 "departamento": nombre_departamento
             }
             for row in resultados
+        ]
+
+    def generar_reporte_brigadas(self) -> List[Dict[str, Any]]:
+        query = (
+            select(BrigadaDB, ConglomeradoDB, MunicipioDB)
+            .join(ConglomeradoDB, BrigadaDB.conglomerado_id == ConglomeradoDB.id)
+            .join(MunicipioDB, ConglomeradoDB.municipio_id == MunicipioDB.id)
+        )
+        resultados = self.session.exec(query).all()
+        
+        return [
+            {
+                "id": brigada.id,
+                "fecha_creacion": brigada.fechaCreacion,
+                "estado": brigada.estado,
+                "conglomerado_id": conglomerado.id,
+                "municipio": municipio.nombre,
+                "fecha_inicio": conglomerado.fechaInicio,
+                "fecha_fin_aprox": conglomerado.fechaFinAprox
+            }
+            for brigada, conglomerado, municipio in resultados
+        ]
+
+    def generar_reporte_conglomerados(self) -> List[Dict[str, Any]]:
+        query = (
+            select(ConglomeradoDB, MunicipioDB)
+            .join(MunicipioDB, ConglomeradoDB.municipio_id == MunicipioDB.id)
+        )
+        resultados = self.session.exec(query).all()
+        
+        return [
+            {
+                "id": conglomerado.id,
+                "municipio": municipio.nombre,
+                "fecha_inicio": conglomerado.fechaInicio,
+                "fecha_fin_aprox": conglomerado.fechaFinAprox,
+                "fecha_fin": conglomerado.fechaFin,
+                "latitud": conglomerado.latitud,
+                "longitud": conglomerado.longitud
+            }
+            for conglomerado, municipio in resultados
         ]
 
 def get_reporte_repository(session: Session = Depends(get_session)) -> ReporteRepository:

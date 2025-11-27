@@ -9,3 +9,9 @@ class ReporteBase(BaseModel):
 class ReporteInventario(ReporteBase):
     departamento: str
     total_items: int
+
+class ReporteBrigadas(ReporteBase):
+    total_brigadas: int
+
+class ReporteConglomerados(ReporteBase):
+    total_conglomerados: int
