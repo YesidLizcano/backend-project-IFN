@@ -95,19 +95,17 @@ class AsignarMaterialesPorDefectoABrigada:
             cantidad = item["solicitado"]
             disponible = item["disponible"]
 
-            asignar = cantidad if disponible >= cantidad else disponible
-
             detalle_item = {
                 "material_equipo_id": material.id,
                 "nombre": nombre,
                 "cantidad_solicitada": cantidad,
-                "cantidad_asignable": asignar,
+                "cantidad_disponible": disponible,
                 "fecha_inicio": fecha_inicio,
                 "fecha_fin": fecha_fin_aprox,
             }
 
-            if asignar < cantidad:
-                detalle_item["faltante"] = cantidad - asignar
+            if disponible < cantidad:
+                detalle_item["faltante"] = cantidad - disponible
                 asignacion_incompleta.append(detalle_item)
             else:
                 asignacion_completa.append(detalle_item)
