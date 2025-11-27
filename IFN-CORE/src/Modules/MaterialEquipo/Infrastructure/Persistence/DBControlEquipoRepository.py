@@ -76,6 +76,42 @@ class DBControlEquipoRepository(ControlEquipoRepository):
         result = self.db.exec(query).first()
         return result if result is not None else 0
 
+    def calcular_disponibilidad_por_nombre_departamento(
+        self, 
+        nombre_equipo: str, 
+        nombre_departamento: str,
+        fecha_inicio: str
+    ) -> int:
+        """
+        Calcula la disponibilidad de un equipo en un departamento específico (por nombre) y fecha.
+        """
+        # Subconsulta para calcular el stock ocupado en la fecha de inicio
+        stock_ocupado = (
+            select(func.coalesce(func.sum(ControlEquipoDB.cantidad_asignada), 0))
+            .select_from(ControlEquipoDB)
+            .where(
+                ControlEquipoDB.id_material_equipo == MaterialEquipoDB.id,
+                ControlEquipoDB.fecha_Inicio_Asignacion <= fecha_inicio,
+                ControlEquipoDB.fecha_Fin_Asignacion >= fecha_inicio
+            )
+            .correlate(MaterialEquipoDB)
+            .scalar_subquery()
+        )
+        
+        # Consulta principal con JOIN a DepartamentoDB
+        query = (
+            select(MaterialEquipoDB.cantidad - stock_ocupado)
+            .select_from(MaterialEquipoDB)
+            .join(DepartamentoDB, MaterialEquipoDB.departamento_id == DepartamentoDB.id)
+            .where(
+                MaterialEquipoDB.nombre == nombre_equipo,
+                DepartamentoDB.nombre == nombre_departamento
+            )
+        )
+        
+        result = self.db.exec(query).first()
+        return result if result is not None else 0
+
     def contar_asignado_desde_hoy(self, id_material_equipo: int) -> int:
         """
         Suma la cantidad asignada para un material cuando hoy está dentro del rango

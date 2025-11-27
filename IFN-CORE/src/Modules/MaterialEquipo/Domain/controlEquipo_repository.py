@@ -29,6 +29,18 @@ class ControlEquipoRepository(ABC):
         pass
 
     @abstractmethod
+    def calcular_disponibilidad_por_nombre_departamento(
+        self, 
+        nombre_equipo: str, 
+        nombre_departamento: str,
+        fecha_inicio: str
+    ) -> int:
+        """
+        Calcula la disponibilidad de un equipo en un departamento específico (por nombre) y fecha.
+        """
+        pass
+
+    @abstractmethod
     def contar_asignado_desde_hoy(self, id_material_equipo: int) -> int:
         """
         Retorna la cantidad total actualmente asignada del material indicado,

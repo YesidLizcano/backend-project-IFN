@@ -13,11 +13,19 @@ class CrearMaterialEquipo:
         self.departamento_repository = departamento_repository
 
     def execute(self, material_equipo: MaterialEquipoCrear, departamento_id: int) -> MaterialEquipoSalida:
-        if not self.departamento_repository.buscar_por_id(departamento_id):
-            raise ValueError("Departamento no encontrado")
+        # Nota: buscar_por_nombre_y_departamento fue reemplazado por buscar_por_nombre_y_nombre_departamento
+        # en la interfaz, pero aquí seguimos usando departamento_id.
+        # Para mantener consistencia sin romper este caso de uso (que usa ID),
+        # deberíamos tener ambos métodos o resolver el nombre del departamento aquí.
+        # Por ahora, asumimos que el repositorio mantiene compatibilidad o ajustamos la llamada.
+        
+        # Ajuste temporal: obtener nombre del departamento para validar duplicado
+        depto = self.departamento_repository.buscar_por_id(departamento_id)
+        if not depto:
+             raise ValueError("Departamento no encontrado")
 
-        if self.material_equipo_repository.buscar_por_nombre_y_departamento(
-            material_equipo.nombre, departamento_id
+        if self.material_equipo_repository.buscar_por_nombre_y_nombre_departamento(
+            material_equipo.nombre, depto.nombre
         ):
             raise ValueError(f"El material '{material_equipo.nombre}' ya existe en este departamento")
 
