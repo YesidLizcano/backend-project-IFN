@@ -32,7 +32,8 @@ class ConglomeradoDetalle(BaseModel):
     longitud: float
 
 class SubparcelaDetalle(BaseModel):
-    descripcion: str
+    latitud: float
+    longitud: float
 
 class BrigadaDetalle(BaseModel):
     fecha_creacion: date

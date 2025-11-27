@@ -196,7 +196,7 @@ class DBReporteRepository(ReporteRepository):
                 "longitud": conglomerado.longitud
             },
             "subparcelas": [
-                {"descripcion": s.descripcion} for s in subparcelas
+                {"latitud": s.latitud, "longitud": s.longitud} for s in subparcelas
             ],
             "brigada": brigada_data,
             "integrantes": integrantes_data,

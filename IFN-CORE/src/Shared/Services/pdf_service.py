@@ -41,7 +41,8 @@ class PDFService:
         y -= 20
         c.setFont("Helvetica", 10)
         for sub in reporte.subparcelas:
-            c.drawString(60, y, f"- {sub.descripcion}")
+            # sub tiene campos 'latitud' y 'longitud'
+            c.drawString(60, y, f"- Coordenadas: {sub.latitud}, {sub.longitud}")
             y -= 15
         y -= 15
 
