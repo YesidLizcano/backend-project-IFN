@@ -100,8 +100,6 @@ class AsignarMaterialesPorDefectoABrigada:
                 "nombre": nombre,
                 "cantidad_solicitada": cantidad,
                 "cantidad_disponible": disponible,
-                "fecha_inicio": fecha_inicio,
-                "fecha_fin": fecha_fin_aprox,
             }
 
             if disponible < cantidad:
@@ -127,8 +125,6 @@ class AsignarMaterialesPorDefectoABrigada:
                     "nombre": material.nombre,
                     "cantidad_total": material.cantidad,
                     "cantidad_disponible": disponible,
-                    "fecha_inicio": fecha_inicio,
-                    "fecha_fin": fecha_fin_aprox,
                 })
 
         return {
