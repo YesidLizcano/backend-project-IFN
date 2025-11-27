@@ -35,9 +35,8 @@ class DBControlEquipoRepository(ControlEquipoRepository):
     ) -> int:
         """
         Calcula la disponibilidad de un equipo en la fecha de inicio solicitada.
-        Solo cuenta las asignaciones que estén activas en esa fecha específica:
-        - fecha_Inicio_Asignacion <= fecha_inicio
-        - fecha_Fin_Asignacion >= fecha_inicio (o es NULL)
+        La disponibilidad depende del periodo del conglomerado asociado a la brigada.
+        Se suman las cantidades asignadas en brigadas cuyos conglomerados cubran la fecha_inicio.
         """
         
         # Subconsulta para obtener el departamento_id de la brigada
@@ -51,13 +50,16 @@ class DBControlEquipoRepository(ControlEquipoRepository):
         )
         
         # Subconsulta para calcular el stock ocupado en la fecha de inicio
+        # Se hace JOIN con BrigadaDB y ConglomeradoDB para filtrar por fechas del conglomerado
         stock_ocupado = (
             select(func.coalesce(func.sum(ControlEquipoDB.cantidad_asignada), 0))
             .select_from(ControlEquipoDB)
+            .join(BrigadaDB, ControlEquipoDB.id_brigada == BrigadaDB.id)
+            .join(ConglomeradoDB, BrigadaDB.conglomerado_id == ConglomeradoDB.id)
             .where(
                 ControlEquipoDB.id_material_equipo == MaterialEquipoDB.id,
-                ControlEquipoDB.fecha_Inicio_Asignacion <= fecha_inicio,
-                ControlEquipoDB.fecha_Fin_Asignacion >= fecha_inicio
+                ConglomeradoDB.fechaInicio <= fecha_inicio,
+                ConglomeradoDB.fechaFinAprox >= fecha_inicio
             )
             .correlate(MaterialEquipoDB)
             .scalar_subquery()
@@ -89,10 +91,12 @@ class DBControlEquipoRepository(ControlEquipoRepository):
         stock_ocupado = (
             select(func.coalesce(func.sum(ControlEquipoDB.cantidad_asignada), 0))
             .select_from(ControlEquipoDB)
+            .join(BrigadaDB, ControlEquipoDB.id_brigada == BrigadaDB.id)
+            .join(ConglomeradoDB, BrigadaDB.conglomerado_id == ConglomeradoDB.id)
             .where(
                 ControlEquipoDB.id_material_equipo == MaterialEquipoDB.id,
-                ControlEquipoDB.fecha_Inicio_Asignacion <= fecha_inicio,
-                ControlEquipoDB.fecha_Fin_Asignacion >= fecha_inicio
+                ConglomeradoDB.fechaInicio <= fecha_inicio,
+                ConglomeradoDB.fechaFinAprox >= fecha_inicio
             )
             .correlate(MaterialEquipoDB)
             .scalar_subquery()
@@ -115,15 +119,19 @@ class DBControlEquipoRepository(ControlEquipoRepository):
     def contar_asignado_desde_hoy(self, id_material_equipo: int) -> int:
         """
         Suma la cantidad asignada para un material cuando hoy está dentro del rango
-        [fecha_Inicio_Asignacion, fecha_Fin_Asignacion] (o sin fecha fin).
+        del conglomerado asociado a la brigada.
         """
         hoy = date.today()
-        query = select(
-            func.coalesce(func.sum(ControlEquipoDB.cantidad_asignada), 0)
-        ).where(
-            ControlEquipoDB.id_material_equipo == id_material_equipo,
-            ControlEquipoDB.fecha_Inicio_Asignacion <= hoy,
-            ControlEquipoDB.fecha_Fin_Asignacion >= hoy,
+        query = (
+            select(func.coalesce(func.sum(ControlEquipoDB.cantidad_asignada), 0))
+            .select_from(ControlEquipoDB)
+            .join(BrigadaDB, ControlEquipoDB.id_brigada == BrigadaDB.id)
+            .join(ConglomeradoDB, BrigadaDB.conglomerado_id == ConglomeradoDB.id)
+            .where(
+                ControlEquipoDB.id_material_equipo == id_material_equipo,
+                ConglomeradoDB.fechaInicio <= hoy,
+                ConglomeradoDB.fechaFinAprox >= hoy,
+            )
         )
         result = self.db.exec(query).first()
         return int(result or 0)

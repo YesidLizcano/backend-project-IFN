@@ -6,8 +6,6 @@ from datetime import date
 class ControlEquipoBase(BaseModel):
     """Contiene los campos comunes que el usuario provee."""
     cantidad_asignada: int
-    fecha_Inicio_Asignacion: date
-    fecha_Fin_Asignacion: date
     
 
 # --- 2. DTO de CREACIÓN (Entrada de la API) ---

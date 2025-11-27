@@ -32,10 +32,11 @@ async def crear_control_equipo(
     control_equipo_repo: ControlEquipoRepository = Depends(get_control_equipo_repository),
     brigada_repo: BrigadaRepository = Depends(get_brigada_repository),
     material_equipo_repo: MaterialEquipoRepository = Depends(get_material_equipo_repository),
+    conglomerado_repo: ConglomeradoRepository = Depends(get_conglomerado_repository),
     token_payload: TokenPayload = Depends(get_token_payload),
 ):
     try:
-        creator = CrearControlEquipo(control_equipo_repo, brigada_repo, material_equipo_repo)
+        creator = CrearControlEquipo(control_equipo_repo, brigada_repo, material_equipo_repo, conglomerado_repo)
         saved_control_equipo = creator.execute(control_equipo_data, brigada_id, material_equipo_id)
         return saved_control_equipo
     except ValueError as e:
